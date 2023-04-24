@@ -9,14 +9,26 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from night import Seatmap
+from Seatmap import NightSeatmap
 
 
 class Ui_Home(object):
-    def openNight(self):
+    def openSeatmap(self):
         self.window = QtWidgets.QMainWindow()
-        self.ui = Seatmap()
+        self.ui = NightSeatmap()
         self.ui.show()
+    
+    
+    def check_total(self):
+        total = self.spadult.value() + self.spchild.value() + self.spelderly.value() + self.spspecialguest.value()
+        if total > 200:
+            diff = total -200
+            sender = self.sender()
+            sender_value = sender.value()
+            if sender_value > diff:
+                sender.setvalue(sender_value-diff)
+            else:
+                sender.setValue(0)
 
     def Totalseats(self):
         self.adult = (self.spadult.value() * 10)
@@ -567,7 +579,6 @@ class Ui_Home(object):
         self.spadult.setProperty("value", 0)
         self.spadult.setDisplayIntegerBase(10)
         self.spadult.setObjectName("spadult")
-        self.spadult.setMaximum(50)
         self.spadult.valueChanged.connect(self.Totalseats)
 
 
@@ -584,7 +595,6 @@ class Ui_Home(object):
         self.spchild.setAccelerated(False)
         self.spchild.setCorrectionMode(QtWidgets.QAbstractSpinBox.CorrectToNearestValue)
         self.spchild.setObjectName("spchild")
-        self.spchild.setMaximum(50)
         self.spchild.valueChanged.connect(self.Totalseats)
 
 
@@ -604,7 +614,6 @@ class Ui_Home(object):
         self.spelderly.setCorrectionMode(QtWidgets.QAbstractSpinBox.CorrectToNearestValue)
         self.spelderly.setKeyboardTracking(False)
         self.spelderly.setObjectName("spelderly")
-        self.spelderly.setMaximum(50)
         self.spelderly.valueChanged.connect(self.Totalseats)
 
 
@@ -624,7 +633,6 @@ class Ui_Home(object):
         self.spspecialguest.setCorrectionMode(QtWidgets.QAbstractSpinBox.CorrectToNearestValue)
         self.spspecialguest.setKeyboardTracking(False)
         self.spspecialguest.setObjectName("spspecialguest")
-        self.spspecialguest.setMaximum(50)
         self.spspecialguest.valueChanged.connect(self.Totalseats)
 
         self.txtSpecialGuest = QtWidgets.QLabel(self.booking)
@@ -676,18 +684,18 @@ class Ui_Home(object):
         self.pbNight1 = QtWidgets.QPushButton(self.selectseats)
         self.pbNight1.setGeometry(QtCore.QRect(50, 220, 301, 71))
         self.pbNight1.setObjectName("pbNight1")
-        self.pbNight1.clicked.connect(self.openNight)
+        self.pbNight1.clicked.connect(self.openSeatmap)
 
 
         self.pbNight2 = QtWidgets.QPushButton(self.selectseats)
         self.pbNight2.setGeometry(QtCore.QRect(50, 330, 301, 71))
         self.pbNight2.setObjectName("pbNight2")
-        self.pbNight2.clicked.connect(self.openNight2)
+        self.pbNight2.clicked.connect(self.openSeatmap)
 
         self.pbNight3 = QtWidgets.QPushButton(self.selectseats)
         self.pbNight3.setGeometry(QtCore.QRect(50, 440, 301, 71))
         self.pbNight3.setObjectName("pbNight3")
-        self.pbNight3.clicked.connect(self.openNight3)
+        self.pbNight3.clicked.connect(self.openSeatmap)
 
 #############################################################################################################################################################################################################################
         self.ylayer_3 = QtWidgets.QLabel(self.selectseats)

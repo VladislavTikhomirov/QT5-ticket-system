@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QLineEdit
 from PyQt5.QtGui import QColor, QPalette, QFont
 from PyQt5 import QtCore, QtGui
-class Seatmap(QWidget):
+class NightSeatmap(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -150,6 +150,6 @@ class Seatmap(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = Seatmap()
+    window = NightSeatmap()
     window.show()
     sys.exit(app.exec_())

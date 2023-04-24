@@ -3,13 +3,12 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVB
 from PyQt5.QtGui import QColor, QPalette, QFont
 from PyQt5 import QtCore, QtGui
 class Seatmap(QWidget):
-    def initUI(self, night):
-        night = 1
+    def __init__(self):
         super().__init__()
-        self.initUI(night)
+        self.initUI()
 
-
-        self.setWindowTitle('Night' + str(night))
+    def initUI(self):
+        self.setWindowTitle('Seatmap')
         self.resize(1080, 1000)
         self.seatspicked = QLineEdit()
         self.price_of_seats = QLineEdit()
@@ -147,8 +146,9 @@ class Seatmap(QWidget):
         self.seatspicked.setText(seats_picked)
     def closeApp(self):
         self.close()
-if __name__ == '__main__':
+        
 
+if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = Seatmap()
     window.show()

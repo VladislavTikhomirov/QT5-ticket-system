@@ -44,9 +44,6 @@ class BookSeats(QWidget):
         formLayout = QFormLayout(self)
         formLayout.addRow("Book Seats:", QDoubleSpinBox())
         self.setLayout(formLayout)
-        self.
-    
-
 
 class ViewSeats(QWidget):
     def __init__(self):

@@ -1,0 +1,6 @@
+.venv
+.vscode
+.DS_Store
+transfer/Programing/Finalized/.DS_Store
+transfer/Programing/Finalized/__pycache__
+transfer/.DS_Store

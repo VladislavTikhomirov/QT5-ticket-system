@@ -1,0 +1,36 @@
+QToolBar {
+  color: red;
+  background-color: #131F44;
+  border: none;
+}
+
+QMainWindow {
+    color: #D0D0D0;
+    background-color: #DDA82A;
+    border: none;
+}
+
+QToolBar::separator {
+    background-color: #D0D0D0; /* Set the color of the separator */
+    width: 1px; /* Set the width of the separator */
+    margin: 6px 0; /* Set the top and bottom margin of the separator */
+}
+
+QToolButton {
+    padding: 4px; /* Set the padding around the tool button */
+    font-family: Arial;
+    font-size: 18px;
+    text-align: center;
+    font-weight: bold;
+    color: #D0D0D0;
+    border: none;
+}
+
+QToolButton:hover, QToolButton:focus, QToolButton:pressed {
+    background-color: #131F84; /* Set the background color when hovered, focused or pressed */
+    color: #DDA82A;
+}
+
+QToolButton:checked {
+    background-color: #A0A0A0; /* Set the background color when checked */
+}

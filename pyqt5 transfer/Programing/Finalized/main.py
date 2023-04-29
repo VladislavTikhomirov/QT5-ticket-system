@@ -8,13 +8,9 @@ class ToolBar(QToolBar):
         super(ToolBar, self).__init__(parent)
         # Toolbar button names
         self.button_names = ["Book Seats", "View Seats", "Payment", "Veiw Revenue", "Search Customer"]
-        # Calculate the button width, height
-        # 4 pixels per separator, no separators before first and after last buttoms
-        # 4 pixels per button for padding
+        # Calculate the button width, height, subtract place for separators 
         button_names_num = len(self.button_names)
-        separators_width  = (button_names_num -1) * 4 
-        padding_width = button_names_num  * 4
-        buttons_width = int( (width - separators_width - padding_width) / button_names_num)
+        buttons_width = int( (width - (button_names_num -1) * 12) / button_names_num )
         buttons_height = int(height*0.1)
         
         # Create Buttons 
@@ -112,7 +108,7 @@ def main():
     window = MainWindow(width,height)
     window.show()
     # Read the QSS file and apply style sheet globally
-    with open("./Programing/Finalized/style.qss", "r") as f:
+    with open("./pyqt5 transfer/Programing/Finalized/style.qss", "r") as f:
         _style = f.read()
         app.setStyleSheet(_style)
     # Start the event loop.

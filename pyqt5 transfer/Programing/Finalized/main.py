@@ -1,7 +1,15 @@
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDoubleSpinBox, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout, QSpinBox, QLineEdit, QFrame, QHBoxLayout, QVBoxLayout, QLabel
 from PyQt5.QtGui import QPalette, QColor
+from PyQt5 import QtCore
 import sys
+
+# Constant for ticket prices 
+ticket_price_adult = 10
+ticket_price_child = 5
+ticket_price_elderly = 5
+ticket_price_special = 0
+
 
 class ToolBar(QToolBar):
     def __init__(self, parent, width, height):
@@ -37,21 +45,55 @@ class ToolBar(QToolBar):
         self.parent().UIs[index].setupUI()
 
 class BookSeats(QWidget):
-    def __init__(self):
+    def __init__(self, width, height):
         super(BookSeats, self).__init__()
+
+        vbox = QVBoxLayout()
+
+        self.my_title = QLabel()
+        self.my_title.setText("Please select number of seats:")
+        vbox.addWidget(self.my_title)
+
+        frame = QFrame(self)
         formLayout = QFormLayout(self)
-        self.my_spin = QDoubleSpinBox()
-        formLayout.addRow("Book Seats:", self.my_spin)
-        self.setLayout(formLayout)
+        # control for spinners
+        self.my_adult = QSpinBox()
+        formLayout.addRow("Adults (£"+str(ticket_price_adult)+"):", self.my_adult)
+        
+        self.my_child = QSpinBox()
+        formLayout.addRow("Children (£"+str(ticket_price_child)+"):", self.my_child)
+
+        self.my_elderly = QSpinBox()
+        formLayout.addRow("Elderly (£"+str(ticket_price_elderly)+"):", self.my_elderly)
+
+        self.my_special = QSpinBox()
+        formLayout.addRow("Special (£"+str(ticket_price_special)+"):", self.my_special)
+
+        self.my_total = QLineEdit()
+        formLayout.addRow("Total Price:",self.my_total)
+        self.my_total.setText("£")
+        self.my_total.setReadOnly(True)
+        
+        #Setting boundaries
+        formLayout.setVerticalSpacing(40)
+        formLayout.setHorizontalSpacing(20)
+        frame.setLayout(formLayout)
+        vbox.addWidget(frame)
+        vbox.setAlignment(QtCore.Qt.AlignCenter)
+        self.setLayout(vbox)
+        
+        self.setFixedHeight(int(height*0.9))
+        self.setFixedWidth(int(width))
+        
 
     def setupUI(self):
-        self.my_spin.setValue(5)
+        self.my_adult.setValue(5)
 
 class ViewSeats(QWidget):
     def __init__(self):
         super(ViewSeats, self).__init__()
         formLayout = QFormLayout(self)
-        formLayout.addRow("View Seats:", QDoubleSpinBox())
+        formLayout.addRow("View Seats:", QSpinBox())
         self.setLayout(formLayout)
     
     def setupUI(self):
@@ -61,7 +103,7 @@ class Payment(QWidget):
     def __init__(self):
         super(Payment, self).__init__()
         formLayout = QFormLayout(self)
-        formLayout.addRow("Payment:", QDoubleSpinBox())
+        formLayout.addRow("Payment:", QSpinBox())
         self.setLayout(formLayout)
     
     def setupUI(self):
@@ -71,7 +113,7 @@ class ViewRevenue(QWidget):
     def __init__(self):
         super(ViewRevenue, self).__init__()
         formLayout = QFormLayout(self)
-        formLayout.addRow("View Revenue:", QDoubleSpinBox())
+        formLayout.addRow("View Revenue:", QSpinBox())
         self.setLayout(formLayout)
     
     def setupUI(self):
@@ -81,7 +123,7 @@ class SearchCustomer(QWidget):
     def __init__(self):
         super(SearchCustomer, self).__init__()
         formLayout = QFormLayout(self)
-        formLayout.addRow("Search Customer:", QDoubleSpinBox())
+        formLayout.addRow("Search Customer:", QSpinBox())
         self.setLayout(formLayout)
     
     def setupUI(self):
@@ -104,7 +146,7 @@ class MainWindow(QMainWindow):
         # Add widgets
         self.layout = QStackedLayout()
         
-        BookSeatsUI = BookSeats()
+        BookSeatsUI = BookSeats(width,height)
         self.layout.addWidget(BookSeatsUI)
 
         ViewSeatsUI = ViewSeats()

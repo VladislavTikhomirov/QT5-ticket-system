@@ -4,6 +4,12 @@ QToolBar {
   border: none;
 }
 
+QStatusBar {
+  color: white;
+  background-color: #131F44;
+  border: none;
+}
+
 QMainWindow {
     color: #D0D0D0;
     background-color: #DDA82A;
@@ -42,4 +48,34 @@ QToolButton:hover, QToolButton:focus, QToolButton:pressed {
 
 QToolButton:checked {
     background-color: #A0A0A0; /* Set the background color when checked */
+}
+
+QSpinBox {
+    font-family: Arial;
+    font-size: 36px;
+    text-align: center;
+    font-weight: bold;
+}
+
+QWidget {
+    font-family: Arial;
+    font-size: 36px;
+    text-align: center;
+    font-weight: bold;
+}
+
+QLineEdit {
+    font-family: Arial;
+    font-size: 36px;
+    text-align: center;
+    font-weight: bold;
+}
+
+QFrame {
+    background-color: #DDA82A;
+    border: 15px solid white;
+}
+
+QLabel{
+    border: 0px solid white;
 }

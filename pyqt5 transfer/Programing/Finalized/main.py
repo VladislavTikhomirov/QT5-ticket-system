@@ -29,17 +29,23 @@ class ToolBar(QToolBar):
         self.setFixedHeight(int(height*0.1))
     
     def handle_toolbar_button_click(self, button):
-        # Route click to the main window handler function
+        # Porcess ToolBar click
         button_text = self.sender().text()
         index =  self.button_names.index(button_text)
-        self.parent().handle_toolbar_button_click(index)
+        # Canhes active layout and call layout init function
+        self.parent().layout.setCurrentIndex(index)
+        self.parent().UIs[index].setupUI()
 
 class BookSeats(QWidget):
     def __init__(self):
         super(BookSeats, self).__init__()
         formLayout = QFormLayout(self)
-        formLayout.addRow("Book Seats:", QDoubleSpinBox())
+        self.my_spin = QDoubleSpinBox()
+        formLayout.addRow("Book Seats:", self.my_spin)
         self.setLayout(formLayout)
+
+    def setupUI(self):
+        self.my_spin.setValue(5)
 
 class ViewSeats(QWidget):
     def __init__(self):
@@ -47,6 +53,9 @@ class ViewSeats(QWidget):
         formLayout = QFormLayout(self)
         formLayout.addRow("View Seats:", QDoubleSpinBox())
         self.setLayout(formLayout)
+    
+    def setupUI(self):
+        print("TODO")
 
 class Payment(QWidget):
     def __init__(self):
@@ -54,6 +63,9 @@ class Payment(QWidget):
         formLayout = QFormLayout(self)
         formLayout.addRow("Payment:", QDoubleSpinBox())
         self.setLayout(formLayout)
+    
+    def setupUI(self):
+        print("TODO")
 
 class ViewRevenue(QWidget):
     def __init__(self):
@@ -61,6 +73,9 @@ class ViewRevenue(QWidget):
         formLayout = QFormLayout(self)
         formLayout.addRow("View Revenue:", QDoubleSpinBox())
         self.setLayout(formLayout)
+    
+    def setupUI(self):
+        print("TODO")
 
 class SearchCustomer(QWidget):
     def __init__(self):
@@ -68,6 +83,9 @@ class SearchCustomer(QWidget):
         formLayout = QFormLayout(self)
         formLayout.addRow("Search Customer:", QDoubleSpinBox())
         self.setLayout(formLayout)
+    
+    def setupUI(self):
+        print("TODO")
 
 class MainWindow(QMainWindow):
     def __init__(self, width, height):
@@ -83,19 +101,28 @@ class MainWindow(QMainWindow):
         statusbar = QStatusBar(self)
         self.setStatusBar(statusbar)
 
+        # Add widgets
         self.layout = QStackedLayout()
-        self.layout.addWidget(BookSeats())
-        self.layout.addWidget(ViewSeats())
-        self.layout.addWidget(Payment())
-        self.layout.addWidget(ViewRevenue())
-        self.layout.addWidget(SearchCustomer())
+        
+        BookSeatsUI = BookSeats()
+        self.layout.addWidget(BookSeatsUI)
 
+        ViewSeatsUI = ViewSeats()
+        self.layout.addWidget(ViewSeatsUI)
+
+        PaymentUI = Payment()
+        self.layout.addWidget(PaymentUI)
+
+        ViewRevenueUI = ViewRevenue()
+        self.layout.addWidget(ViewRevenueUI)
+        
+        SearchCustomerUI = SearchCustomer()
+        self.layout.addWidget(SearchCustomerUI)
+
+        self.UIs = [BookSeatsUI, ViewSeatsUI, PaymentUI, ViewRevenueUI, SearchCustomerUI]
         widget = QWidget()
         widget.setLayout(self.layout)
         self.setCentralWidget(widget)
-    
-    def handle_toolbar_button_click(self, index):
-         self.layout.setCurrentIndex(index)
 
 def main():
     app = QApplication(sys.argv)

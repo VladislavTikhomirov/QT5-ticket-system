@@ -58,7 +58,7 @@ class BookSeats(QWidget):
         formLayout = QFormLayout(self)
         # control for spinners
         self.my_adult = QSpinBox()
-        formLayout.addRow("Adults (£"+str(ticket_price_adult)+"):", self.my_adult)
+        formLayout.addRow(f"Adults (£ {ticket_price_adult}) :", self.my_adult)
         
         self.my_child = QSpinBox()
         formLayout.addRow("Children (£"+str(ticket_price_child)+"):", self.my_child)

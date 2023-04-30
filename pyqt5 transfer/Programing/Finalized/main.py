@@ -9,20 +9,19 @@ ticket_price_adult = 10
 ticket_price_child = 5
 ticket_price_elderly = 5
 ticket_price_special = 0
-cinema_rows = 10
-cinema_seats_per_row = 20
-
+# Cimema hall size 
+cinema_rows = 2
+cinema_seats_per_row = 2
 
 class ToolBar(QToolBar):
     def __init__(self, parent, width, height):
         super(ToolBar, self).__init__(parent)
         # Toolbar button names
-        self.button_names = ["Book Seats", "View Seats", "Payment", "Veiw Revenue", "Search Customer"]
+        self.button_names = ["Confirm Tickets", "Select Seats", "Payment", "Veiw Revenue", "Search Customer"]
         # Calculate the button width, height, subtract place for separators 
         button_names_num = len(self.button_names)
         buttons_width = int( (width - (button_names_num -1) * 12) / button_names_num )
         buttons_height = int(height*0.1)
-        
         # Create Buttons 
         for name in self.button_names:
             button = QToolButton()
@@ -46,9 +45,9 @@ class ToolBar(QToolBar):
         self.parent().layout.setCurrentIndex(index)
         self.parent().UIs[index].setupUI()
 
-class BookSeats(QWidget):
+class ConfirmTickets(QWidget):
     def __init__(self, width, height):
-        super(BookSeats, self).__init__()
+        super(ConfirmTickets, self).__init__()
 
         vbox = QVBoxLayout()
 
@@ -58,7 +57,7 @@ class BookSeats(QWidget):
 
         frame = QFrame(self)
         formLayout = QFormLayout(self)
-        # control for spinners
+    
         self.my_adult = QSpinBox()
         formLayout.addRow(f"Adults (£{ticket_price_adult}) :", self.my_adult)
         self.my_adult.valueChanged.connect(self.setTotal)
@@ -87,28 +86,31 @@ class BookSeats(QWidget):
         vbox.addWidget(frame)
         vbox.setAlignment(QtCore.Qt.AlignCenter)
         self.setLayout(vbox)
-        
         self.setFixedHeight(int(height*0.9))
         self.setFixedWidth(int(width))
 
     def setTotal(self):
+        total_places = self.my_adult.value() + self.my_child.value() + self.my_elderly.value() + self.my_special.value()
+
         adult = (self.my_adult.value() * ticket_price_adult)
         child = (self.my_child.value() * ticket_price_child)
         elderly = (self.my_elderly.value() * ticket_price_elderly)
         special = (self.my_special.value() * ticket_price_special)
-        total = adult + child + elderly + special
-        #if total >= 200:
-        sender = self.sender()
-        sender_value = sender.value()
-
-        self.my_total.setText('£' + str(total))
+        total_price = '£' + str (adult + child + elderly + special)
+        
+        if  total_places > cinema_rows * cinema_seats_per_row :
+            sender = self.sender()
+            sender_value = sender.value()
+            sender.setValue(sender_value -1)
+        else:
+            self.my_total.setText(str(total_price))
 
     def setupUI(self):
-        self.my_adult.setValue(5)
+        print("TODO")
 
-class ViewSeats(QWidget):
+class SelectSeats(QWidget):
     def __init__(self):
-        super(ViewSeats, self).__init__()
+        super(SelectSeats, self).__init__()
         formLayout = QFormLayout(self)
         formLayout.addRow("View Seats:", QSpinBox())
         self.setLayout(formLayout)
@@ -163,11 +165,11 @@ class MainWindow(QMainWindow):
         # Add widgets
         self.layout = QStackedLayout()
         
-        BookSeatsUI = BookSeats(width,height)
-        self.layout.addWidget(BookSeatsUI)
+        ConfirmTicketsUI = ConfirmTickets(width,height)
+        self.layout.addWidget(ConfirmTicketsUI)
 
-        ViewSeatsUI = ViewSeats()
-        self.layout.addWidget(ViewSeatsUI)
+        SelectSeatsUI = SelectSeats()
+        self.layout.addWidget(SelectSeatsUI)
 
         PaymentUI = Payment()
         self.layout.addWidget(PaymentUI)
@@ -178,7 +180,7 @@ class MainWindow(QMainWindow):
         SearchCustomerUI = SearchCustomer()
         self.layout.addWidget(SearchCustomerUI)
 
-        self.UIs = [BookSeatsUI, ViewSeatsUI, PaymentUI, ViewRevenueUI, SearchCustomerUI]
+        self.UIs = [ConfirmTicketsUI, SelectSeatsUI, PaymentUI, ViewRevenueUI, SearchCustomerUI]
         widget = QWidget()
         widget.setLayout(self.layout)
         self.setCentralWidget(widget)

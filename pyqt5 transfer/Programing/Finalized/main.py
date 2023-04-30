@@ -9,6 +9,8 @@ ticket_price_adult = 10
 ticket_price_child = 5
 ticket_price_elderly = 5
 ticket_price_special = 0
+cinema_rows = 10
+cinema_seats_per_row = 20
 
 
 class ToolBar(QToolBar):
@@ -59,15 +61,19 @@ class BookSeats(QWidget):
         # control for spinners
         self.my_adult = QSpinBox()
         formLayout.addRow(f"Adults (£{ticket_price_adult}) :", self.my_adult)
-        
+        self.my_adult.valueChanged.connect(self.setTotal)
+
         self.my_child = QSpinBox()
         formLayout.addRow(f"Children (£{ticket_price_child}) :", self.my_child)
+        self.my_child.valueChanged.connect(self.setTotal)
 
         self.my_elderly = QSpinBox()
         formLayout.addRow(f"Elderly (£{ticket_price_elderly}) :", self.my_elderly)
+        self.my_elderly.valueChanged.connect(self.setTotal)
 
         self.my_special = QSpinBox()
         formLayout.addRow(f"Special (£{ticket_price_special}) :", self.my_special)
+        self.my_special.valueChanged.connect(self.setTotal)
 
         self.my_total = QLineEdit()
         formLayout.addRow("Total Price:",self.my_total)
@@ -84,7 +90,18 @@ class BookSeats(QWidget):
         
         self.setFixedHeight(int(height*0.9))
         self.setFixedWidth(int(width))
-        
+
+    def setTotal(self):
+        adult = (self.my_adult.value() * ticket_price_adult)
+        child = (self.my_child.value() * ticket_price_child)
+        elderly = (self.my_elderly.value() * ticket_price_elderly)
+        special = (self.my_special.value() * ticket_price_special)
+        total = adult + child + elderly + special
+        #if total >= 200:
+        sender = self.sender()
+        sender_value = sender.value()
+
+        self.my_total.setText('£' + str(total))
 
     def setupUI(self):
         self.my_adult.setValue(5)

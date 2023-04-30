@@ -58,16 +58,16 @@ class BookSeats(QWidget):
         formLayout = QFormLayout(self)
         # control for spinners
         self.my_adult = QSpinBox()
-        formLayout.addRow(f"Adults (£ {ticket_price_adult}) :", self.my_adult)
+        formLayout.addRow(f"Adults (£{ticket_price_adult}) :", self.my_adult)
         
         self.my_child = QSpinBox()
-        formLayout.addRow("Children (£"+str(ticket_price_child)+"):", self.my_child)
+        formLayout.addRow(f"Children (£{ticket_price_child}) :", self.my_child)
 
         self.my_elderly = QSpinBox()
-        formLayout.addRow("Elderly (£"+str(ticket_price_elderly)+"):", self.my_elderly)
+        formLayout.addRow(f"Elderly (£{ticket_price_elderly}) :", self.my_elderly)
 
         self.my_special = QSpinBox()
-        formLayout.addRow("Special (£"+str(ticket_price_special)+"):", self.my_special)
+        formLayout.addRow(f"Special (£{ticket_price_special}) :", self.my_special)
 
         self.my_total = QLineEdit()
         formLayout.addRow("Total Price:",self.my_total)

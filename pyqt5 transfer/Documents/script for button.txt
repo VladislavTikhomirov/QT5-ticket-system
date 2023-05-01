@@ -9,11 +9,3 @@ def openWindow2(self):
 
 
 clicked = lambda: self.openWindow2()
-
-
-
-
-here is the script to connect a line edit and a spin box 
-
-
-self.spin_box.valueChanged.connect(self.line_edit.setText)

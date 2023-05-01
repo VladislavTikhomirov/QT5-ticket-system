@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout, QSpinBox, QLineEdit, QFrame, QHBoxLayout, QVBoxLayout, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout, QSpinBox, QLineEdit, QGroupBox, QFrame, QHBoxLayout, QVBoxLayout, QLabel, QRadioButton, QButtonGroup
 from PyQt5.QtGui import QPalette, QColor
 from PyQt5 import QtCore
 import sys
@@ -68,7 +68,29 @@ class BookTickets(QWidget):
         formLayout1.addWidget(self.my_title)
 
         #TODO add show slection to FormLayout 
-    
+        self.my_show1 = QRadioButton('Show 1')
+        self.my_show2 = QRadioButton('Show 2')
+        self.my_show3 = QRadioButton('Show 3')
+        # Group radio buttons
+        self.my_show_group = QButtonGroup()
+        self.my_show_group.addButton(self.my_show1)
+        self.my_show_group.addButton(self.my_show2)
+        self.my_show_group.addButton(self.my_show3)
+        # Make a layout so that the radio buttons can be on one row:
+        groupBox = QGroupBox()
+        groupBox.setLayout(QVBoxLayout())
+        groupBox.layout().addWidget(self.my_show1)
+        groupBox.layout().addWidget(self.my_show2)
+        groupBox.layout().addWidget(self.my_show3)
+        hbox = QHBoxLayout()
+        hbox.addWidget(QLabel("Choose a Screening:"))
+        hbox.addWidget(groupBox)
+        formLayout1.addRow(hbox)
+        # Logic to see which radio button is pressed
+        self.my_show_group.buttonClicked.connect(self.my_show_clicked)
+        ##    
+        self.setLayout(formLayout1)
+        self.show()
         self.my_adult = QSpinBox()
         formLayout1.addRow(f"Adults (£{ticket_price_adult}) :", self.my_adult)
         self.my_adult.valueChanged.connect(self.setTotal)
@@ -137,6 +159,16 @@ class BookTickets(QWidget):
             sender.setValue(sender_value -1)
         else:
             self.my_total.setText(str(total_price))
+            
+    def my_show_clicked(self, button):
+        if button.isChecked():
+            if button.text() == 'Show 1':
+                self.show = 1
+            elif button.text() == 'Show 2':
+                self.show = 2
+            else:
+                self.show = 3
+        print(self.show)   
 
     def setupUI(self):
         print("TODO")

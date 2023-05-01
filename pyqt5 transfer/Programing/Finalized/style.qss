@@ -1,19 +1,13 @@
-QToolBar {
-  color: red;
-  background-color: #131F44;
-  border: none;
-}
-
-QStatusBar {
-  color: white;
-  background-color: #131F44;
-  border: none;
-}
-
 QMainWindow {
     color: #D0D0D0;
     background-color: #DDA82A;
     border: none;
+}
+
+QToolBar {
+  color: #DDA82A;
+  background-color: #131F44;
+  border: none;
 }
 
 QToolBar::separator {
@@ -27,6 +21,16 @@ QToolBar::separator {
     padding: 0px;
 }
 
+QStatusBar {
+  color: #DDA82A;
+  background-color: #131F44;
+  border: none;
+  font-family: Arial;
+  font-size: 16px;
+  text-align: center;
+  font-weight: bold;
+}
+
 QToolButton {
     padding: 0px; /* Set the padding around the tool button */
     margin-top: 6px;
@@ -34,7 +38,7 @@ QToolButton {
     margin-bottom: 6px;
     margin-left: 0px;
     font-family: Arial;
-    font-size: 18px;
+    font-size: 24px;
     text-align: center;
     font-weight: bold;
     color: #D0D0D0;
@@ -52,30 +56,28 @@ QToolButton:checked {
 
 QSpinBox {
     font-family: Arial;
-    font-size: 36px;
-    text-align: center;
+    font-size: 24px;
     font-weight: bold;
-}
-
-QWidget {
-    font-family: Arial;
-    font-size: 36px;
     text-align: center;
-    font-weight: bold;
 }
 
 QLineEdit {
     font-family: Arial;
-    font-size: 36px;
-    text-align: center;
+    font-size: 24px;
     font-weight: bold;
+    text-align: center;
 }
 
 QFrame {
     background-color: #DDA82A;
-    border: 15px solid white;
+    border: 2px solid white;
+    text-align: center;
 }
 
 QLabel{
     border: 0px solid white;
+    font-family: Arial;
+    font-size: 24px;
+    text-align: center;
+    font-weight: bold;
 }

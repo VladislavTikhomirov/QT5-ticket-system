@@ -67,54 +67,51 @@ class BookTickets(QWidget):
         self.my_title = QLabel("Select Tickets")
         formLayout1.addWidget(self.my_title)
 
-        #TODO add show slection to FormLayout 
+        # Create and add group of radio buttons
         self.my_show1 = QRadioButton('Show 1')
         self.my_show2 = QRadioButton('Show 2')
         self.my_show3 = QRadioButton('Show 3')
-        # Group radio buttons
+        
         self.my_show_group = QButtonGroup()
         self.my_show_group.addButton(self.my_show1)
         self.my_show_group.addButton(self.my_show2)
         self.my_show_group.addButton(self.my_show3)
-        # Make a layout so that the radio buttons can be on one row:
+        
         groupBox = QGroupBox()
         groupBox.setLayout(QVBoxLayout())
         groupBox.layout().addWidget(self.my_show1)
         groupBox.layout().addWidget(self.my_show2)
         groupBox.layout().addWidget(self.my_show3)
-        hbox = QHBoxLayout()
-        hbox.addWidget(QLabel("Choose a Screening:"))
-        hbox.addWidget(groupBox)
-        formLayout1.addRow(hbox)
-        # Logic to see which radio button is pressed
+        formLayout1.addRow("Select a Show", groupBox)
+        # Radio button press handler
         self.my_show_group.buttonClicked.connect(self.my_show_clicked)
-        ##    
-        self.setLayout(formLayout1)
-        self.show()
+        
+        # Create and add spin boxes
         self.my_adult = QSpinBox()
-        formLayout1.addRow(f"Adults (£{ticket_price_adult}) :", self.my_adult)
+        formLayout1.addRow(f"Adults (£{ticket_price_adult})", self.my_adult)
         self.my_adult.valueChanged.connect(self.setTotal)
         self.my_adult.setFixedWidth(100)
         self.my_adult.setFixedHeight(40)
 
         self.my_child = QSpinBox()
-        formLayout1.addRow(f"Children (£{ticket_price_child}) :", self.my_child)
+        formLayout1.addRow(f"Children (£{ticket_price_child})", self.my_child)
         self.my_child.valueChanged.connect(self.setTotal)
         self.my_child.setFixedWidth(100)
         self.my_child.setFixedHeight(40)
 
         self.my_elderly = QSpinBox()
-        formLayout1.addRow(f"Elderly (£{ticket_price_elderly}) :", self.my_elderly)
+        formLayout1.addRow(f"Elderly (£{ticket_price_elderly})", self.my_elderly)
         self.my_elderly.valueChanged.connect(self.setTotal)
         self.my_elderly.setFixedWidth(100)
         self.my_elderly.setFixedHeight(40)
 
         self.my_special = QSpinBox()
-        formLayout1.addRow(f"Special (£{ticket_price_special}) :", self.my_special)
+        formLayout1.addRow(f"Special (£{ticket_price_special})", self.my_special)
         self.my_special.valueChanged.connect(self.setTotal)
         self.my_special.setFixedWidth(100)
         self.my_special.setFixedHeight(40)
 
+        # Create and add total
         self.my_total = QLabel()
         formLayout1.addRow("Total Price:",self.my_total)
         self.my_total.setText("£ 0")

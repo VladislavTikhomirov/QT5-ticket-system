@@ -96,7 +96,12 @@ QPushButton {
     font-size: 10px;
 }
 
-QPushButton:hover, QToolButton:focus, QToolButton:pressed {
+QPushButton:hover {
+    background-color: darkgreen; /* Set the background color when hovered, focused or pressed */
+    color: #DDA82A;
+}
+
+QPushButton:checked {
     background-color: darkgreen; /* Set the background color when hovered, focused or pressed */
     color: #DDA82A;
 }

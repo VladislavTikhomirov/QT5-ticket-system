@@ -3,41 +3,25 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QTo
 from PyQt5.QtGui import QPalette, QColor, QFont
 from PyQt5 import QtCore
 import sys
-#from Seatmap import seatmap
-
-# Constant for ticket prices 
-ticket_price_adult = 10
-ticket_price_child = 5
-ticket_price_elderly = 5
-ticket_price_special = 0
-# Cimema hall size 
-cinema_rows = 10
-cinema_seats_per_row = 20
-# Program window size as % from screen
-main_window_height = 0.8 
-main_window_width = 0.8
-# Toolbar size as % from program window
-toolbar_height = 0.1
-# Strings
-main_window_title = "Collyers Theater Resevartion System"
-toolbar_button_names = ["Book Tickets", "Payment", "Manage Seats",  "Veiw Revenue", "Search Customer"]
+import resources as res
 
 class ToolBar(QToolBar):
-    def __init__(self, parent, width, height):
-        super(ToolBar, self).__init__(parent)
+    def __init__(self, main_window, width, height):
+        super(ToolBar, self).__init__(main_window)
+        self.main_window = main_window 
         self.setMovable(False)
-        self.setFixedHeight(int(height*toolbar_height))
+        self.setFixedHeight(int(height*res.toolbar_height))
         # Calculate the button width, height, subtract place for separators 
-        button_names_num = len(toolbar_button_names)
+        button_names_num = len(res.toolbar_button_names)
         buttons_width = int( (width - (button_names_num -1) * 12) / button_names_num )
-        buttons_height = int(height*toolbar_height)
+        buttons_height = int(height*res.toolbar_height)
         # Create Buttons 
-        for name in toolbar_button_names:
+        for name in res.toolbar_button_names:
             button = QToolButton()
             button.setText(name)
             self.addWidget(button)
             # Add Separators between buttons, but not before first and after last buttoms
-            if name != toolbar_button_names[button_names_num -1]:
+            if name != res.toolbar_button_names[button_names_num -1]:
                 self.addSeparator()
             button.setFixedWidth(buttons_width)
             button.setFixedHeight(buttons_height)
@@ -47,15 +31,16 @@ class ToolBar(QToolBar):
     def handle_toolbar_button_click(self, button):
         # Porcess ToolBar click
         button_text = self.sender().text()
-        index =  toolbar_button_names.index(button_text)
+        index =  res.toolbar_button_names.index(button_text)
         # Canhes active layout and call layout init function
-        self.parent().layout.setCurrentIndex(index)
-        self.parent().UIs[index].setupUI()
+        self.main_window.layout.setCurrentIndex(index)
+        #self.parent().UIs[index].setupUI()
 
 class BookTickets(QWidget):
-    def __init__(self, width, height):
-        super(BookTickets, self).__init__()
+    def __init__(self, main_window, width, height):
+        super(BookTickets, self).__init__(main_window)
         
+        self.main_window = main_window 
         mainLayout = QHBoxLayout()
 
         frameLeft = QFrame(self)
@@ -89,25 +74,25 @@ class BookTickets(QWidget):
         
         # Create and add spin boxes
         self.my_adult = QSpinBox()
-        formLeftLayout.addRow(f"Adults (£{ticket_price_adult})", self.my_adult)
+        formLeftLayout.addRow(f"Adults (£{res.ticket_price_adult})", self.my_adult)
         self.my_adult.valueChanged.connect(self.setTotal)
         self.my_adult.setFixedWidth(100)
         self.my_adult.setFixedHeight(40)
 
         self.my_child = QSpinBox()
-        formLeftLayout.addRow(f"Children (£{ticket_price_child})", self.my_child)
+        formLeftLayout.addRow(f"Children (£{res.ticket_price_child})", self.my_child)
         self.my_child.valueChanged.connect(self.setTotal)
         self.my_child.setFixedWidth(100)
         self.my_child.setFixedHeight(40)
 
         self.my_elderly = QSpinBox()
-        formLeftLayout.addRow(f"Elderly (£{ticket_price_elderly})", self.my_elderly)
+        formLeftLayout.addRow(f"Elderly (£{res.ticket_price_elderly})", self.my_elderly)
         self.my_elderly.valueChanged.connect(self.setTotal)
         self.my_elderly.setFixedWidth(100)
         self.my_elderly.setFixedHeight(40)
 
         self.my_special = QSpinBox()
-        formLeftLayout.addRow(f"Special (£{ticket_price_special})", self.my_special)
+        formLeftLayout.addRow(f"Special (£{res.ticket_price_special})", self.my_special)
         self.my_special.valueChanged.connect(self.setTotal)
         self.my_special.setFixedWidth(100)
         self.my_special.setFixedHeight(40)
@@ -135,7 +120,7 @@ class BookTickets(QWidget):
         self.my_title = QLabel("Seats map:")
         formRightLayout.addWidget(self.my_title)
         
-        SetMapUI = SeatMap()
+        SetMapUI = SeatMap(self.main_window)
         formRightLayout.addWidget(SetMapUI)
         
         frameRight.setLayout(formRightLayout)
@@ -144,21 +129,21 @@ class BookTickets(QWidget):
         self.setLayout(mainLayout)
 
     def setTotal(self):
-        total_places = self.my_adult.value() + self.my_child.value() + self.my_elderly.value() + self.my_special.value()
+        total_places = self.get_total_seats()
 
-        adult_prise = (self.my_adult.value() * ticket_price_adult)
-        child_price = (self.my_child.value() * ticket_price_child)
-        elderly_price = (self.my_elderly.value() * ticket_price_elderly)
-        special_price = (self.my_special.value() * ticket_price_special)
+        adult_prise = (self.my_adult.value() * res.ticket_price_adult)
+        child_price = (self.my_child.value() * res.ticket_price_child)
+        elderly_price = (self.my_elderly.value() * res.ticket_price_elderly)
+        special_price = (self.my_special.value() * res.ticket_price_special)
         total_price = '£' + str (adult_prise + child_price + elderly_price + special_price)
         
-        if  total_places > cinema_rows * cinema_seats_per_row:
+        if  total_places > res.cinema_rows * res.inema_seats_per_row:
             sender = self.sender()
             sender_value = sender.value()
             sender.setValue(sender_value -1)
         else:
             self.my_total.setText(str(total_price))
-            
+         
     def my_show_clicked(self, button):
         if button.isChecked():
             if button.text() == 'Show 1':
@@ -170,14 +155,17 @@ class BookTickets(QWidget):
             #self.seatmap = seatmap(main_window_width, main_window_height, self.show)
             #self.seatmap.show()
             
-        print(self.show)   
+        print(self.show)
 
-    def setupUI(self):
-        print("TODO")
+    def get_total_seats(self):
+        total = self.my_adult.value() + self.my_child.value() + self.my_elderly.value() + self.my_special.value()
+        return total
 
 class Payment(QWidget):
-    def __init__(self):
-        super(Payment, self).__init__()
+    def __init__(self,main_window):
+        super(Payment, self).__init__(main_window)
+
+        self.main_window = main_window 
         formLayout = QFormLayout(self)
         self.setLayout(formLayout)
 
@@ -193,46 +181,42 @@ class Payment(QWidget):
         self.lnCardNumber.setFixedHeight(30)
         formLayout.addRow("Card Number:", self.lnCardNumber)
     
-    def setupUI(self):
-        print("TODO")
-
 class ManageSeats(QWidget):
-    def __init__(self):
-        super(ManageSeats, self).__init__()
+    def __init__(self,main_window):
+        super(ManageSeats, self).__init__(main_window)
+
+        self.main_window = main_window 
         formLayout = QFormLayout(self)
         formLayout.addRow("View Seats:", QSpinBox())
         self.setLayout(formLayout)
-    
-    def setupUI(self):
-        print("TODO")
 
 class ViewRevenue(QWidget):
-    def __init__(self):
-        super(ViewRevenue, self).__init__()
+    def __init__(self,main_window):
+        super(ViewRevenue, self).__init__(main_window)
+
+        self.main_window = main_window 
         formLayout = QFormLayout(self)
         formLayout.addRow("View Revenue:", QSpinBox())
         self.setLayout(formLayout)
-    
-    def setupUI(self):
-        print("TODO")
 
 class SearchCustomer(QWidget):
-    def __init__(self):
-        super(SearchCustomer, self).__init__()
+    def __init__(self,main_window):
+        super(SearchCustomer, self).__init__(main_window)
+
+        self.main_window = main_window 
         formLayout = QFormLayout(self)
         formLayout.addRow("Search Customer:", QSpinBox())
         self.setLayout(formLayout)
-    
-    def setupUI(self):
-        print("TODO")
 
 class SeatMap(QWidget):
-    def __init__(self):
-        super(SeatMap, self).__init__()
+    def __init__(self,main_window):
+        super(SeatMap, self).__init__(main_window)
+
+        self.main_window = main_window 
         mainLayout = QVBoxLayout()
 
         seatsFrame = QFrame(self)
-     
+
         screenFrame = QFrame()
         screenFrame.setFixedHeight(40)
         screenFrame.setStyleSheet('background-color: black;')
@@ -243,25 +227,38 @@ class SeatMap(QWidget):
         screenFrame.setLayout(screenLayout)
         
         seatsLayout = QGridLayout()
-        for row in range(0,cinema_rows):
-            for seat in range(0,cinema_seats_per_row):
+        for row in range(0,res.cinema_rows):
+            for seat in range(0,res.cinema_seats_per_row):
                 button = QPushButton(chr(97+row).upper() + str(seat))
                 button.setFixedSize(30, 30)
                 seatsLayout.addWidget(button, row, seat)
+                button.setCheckable(True)
+                button.clicked.connect(self.button_clicked)
 
         seatsFrame.setLayout(seatsLayout)
 
         mainLayout.addWidget(screenFrame)
         mainLayout.addWidget(seatsFrame)
         self.setLayout(mainLayout)
-    
-    def setupUI(self):
-        print("TODO")
+
+        self.selected_seats = []
+
+    def button_clicked(self):
+        button = self.sender()
+
+        index = self.main_window.layout.currentIndex()
+        #check = self.main_window.UIs[0].get_to
+        if button.isChecked():
+            self.selected_seats.append(button.text())
+        else:
+            self.selected_seats.sort()
+            self.selected_seats.remove(button.text())
+        print('Selected seats:', self.selected_seats)
 
 class MainWindow(QMainWindow):
     def __init__(self, width, height):
         super(MainWindow, self).__init__()
-        self.setWindowTitle(main_window_title)
+        self.setWindowTitle(res.main_window_title)
         self.setFixedSize(QSize(width,height))     
         
         # Add Tool Bar
@@ -275,19 +272,19 @@ class MainWindow(QMainWindow):
         # Add widgets
         self.layout = QStackedLayout()
         
-        BookTicketsUI = BookTickets(width,height)
+        BookTicketsUI = BookTickets(self,width,height)
         self.layout.addWidget(BookTicketsUI)
 
-        PaymentUI = Payment()
+        PaymentUI = Payment(self)
         self.layout.addWidget(PaymentUI)
 
-        ManageSeatsUI = ManageSeats()
+        ManageSeatsUI = ManageSeats(self)
         self.layout.addWidget(ManageSeatsUI)
 
-        ViewRevenueUI = ViewRevenue()
+        ViewRevenueUI = ViewRevenue(self)
         self.layout.addWidget(ViewRevenueUI)
         
-        SearchCustomerUI = SearchCustomer()
+        SearchCustomerUI = SearchCustomer(self)
         self.layout.addWidget(SearchCustomerUI)
 
         # UI list will hold references for windows
@@ -301,12 +298,12 @@ def main():
     # Get the screen resolution
     screen_resolution = app.desktop().screenGeometry()
     width, height = screen_resolution.width(), screen_resolution.height()
-    width =  int(width * main_window_width)
-    height = int(height * main_window_height)
+    width =  int(width * res.main_window_width)
+    height = int(height * res.main_window_height)
     window = MainWindow(width,height)
     window.show()
     # Read the QSS file and apply style sheet globally
-    with open("./pyqt5 transfer/Programing/Finalized/style.qss", "r") as f:
+    with open("./pyqt5 transfer/src/style.qss", "r") as f:
         _style = f.read()
         app.setStyleSheet(_style)
     # Start the event loop.

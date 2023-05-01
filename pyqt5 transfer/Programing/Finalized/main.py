@@ -15,11 +15,11 @@ cinema_seats_per_row = 2
 # Program window size as % from screen
 main_window_height = 0.8 
 main_window_width = 0.8
-# Toolbar size as $ from program window
+# Toolbar size as % from program window
 toolbar_height = 0.1
 # Strings
 main_window_title = "Collyers Theater Resevartion System"
-toolbar_button_names = ["Select Tickets", "Select Seats", "Payment", "Veiw Revenue", "Search Customer"]
+toolbar_button_names = ["Book Tickets", "Payment", "Manage Seats",  "Veiw Revenue", "Search Customer"]
 
 class ToolBar(QToolBar):
     def __init__(self, parent, width, height):
@@ -51,74 +51,76 @@ class ToolBar(QToolBar):
         self.parent().layout.setCurrentIndex(index)
         self.parent().UIs[index].setupUI()
 
-class SelectTickets(QWidget):
+class BookTickets(QWidget):
     def __init__(self, width, height):
-        super(SelectTickets, self).__init__()
+        super(BookTickets, self).__init__()
+        
         main_layout = QHBoxLayout()
 
         frame1 = QFrame(self)
+
         formLayout1 = QFormLayout(self)
         formLayout1.setVerticalSpacing(50)
         formLayout1.setHorizontalSpacing(50)
         formLayout1.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         
-        self.my_title = QLabel("Select Shows:")
+        self.my_title = QLabel("Select Tickets")
         formLayout1.addWidget(self.my_title)
 
-        frame1.setLayout(formLayout1)
-        main_layout.addWidget(frame1)
-        frame1.setFixedWidth(int(width/2)) 
-        self.setLayout(main_layout)
+        #TODO add show slection to FormLayout 
     
-        frame2 = QFrame(self)
-        formLayout2 = QFormLayout(self)
-        formLayout2.setVerticalSpacing(50)
-        formLayout2.setHorizontalSpacing(50)
-        formLayout2.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-
-        self.my_title = QLabel("Select Tickets")
-        formLayout2.addWidget(self.my_title)
-
-        #adds empty row
-        formLayout2.addWidget(QLabel())
-
         self.my_adult = QSpinBox()
-        formLayout2.addRow(f"Adults (£{ticket_price_adult}) :", self.my_adult)
+        formLayout1.addRow(f"Adults (£{ticket_price_adult}) :", self.my_adult)
         self.my_adult.valueChanged.connect(self.setTotal)
         self.my_adult.setFixedWidth(100)
         self.my_adult.setFixedHeight(40)
 
         self.my_child = QSpinBox()
-        formLayout2.addRow(f"Children (£{ticket_price_child}) :", self.my_child)
+        formLayout1.addRow(f"Children (£{ticket_price_child}) :", self.my_child)
         self.my_child.valueChanged.connect(self.setTotal)
         self.my_child.setFixedWidth(100)
         self.my_child.setFixedHeight(40)
 
         self.my_elderly = QSpinBox()
-        formLayout2.addRow(f"Elderly (£{ticket_price_elderly}) :", self.my_elderly)
+        formLayout1.addRow(f"Elderly (£{ticket_price_elderly}) :", self.my_elderly)
         self.my_elderly.valueChanged.connect(self.setTotal)
         self.my_elderly.setFixedWidth(100)
         self.my_elderly.setFixedHeight(40)
 
         self.my_special = QSpinBox()
-        formLayout2.addRow(f"Special (£{ticket_price_special}) :", self.my_special)
+        formLayout1.addRow(f"Special (£{ticket_price_special}) :", self.my_special)
         self.my_special.valueChanged.connect(self.setTotal)
         self.my_special.setFixedWidth(100)
         self.my_special.setFixedHeight(40)
 
-        #adds empty row
-        formLayout2.addWidget(QLabel())
-
         self.my_total = QLabel()
-        formLayout2.addRow("Total Price:",self.my_total)
+        formLayout1.addRow("Total Price:",self.my_total)
         self.my_total.setText("£ 0")
     
         self.my_button = QToolButton()
         self.my_button.setText("Next >>")
+        formLayout1.addWidget(self.my_button)
 
-        formLayout2.addWidget(self.my_button)
+        frame1.setLayout(formLayout1)
+        main_layout.addWidget(frame1)
+        frame1.setFixedWidth(int(width/2)) 
+
+        frame2 = QFrame(self)
+
+        formLayout2 = QFormLayout(self)
+        formLayout2.setVerticalSpacing(50)
+        formLayout2.setHorizontalSpacing(50)
+        formLayout2.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        
+        self.my_title = QLabel("Seats map:")
+        formLayout2.addWidget(self.my_title)
+
+        #TODO add seat map
+
         frame2.setLayout(formLayout2)
         main_layout.addWidget(frame2)
+       
+        self.setLayout(main_layout)
 
     def setTotal(self):
         total_places = self.my_adult.value() + self.my_child.value() + self.my_elderly.value() + self.my_special.value()
@@ -139,21 +141,21 @@ class SelectTickets(QWidget):
     def setupUI(self):
         print("TODO")
 
-class SelectSeats(QWidget):
-    def __init__(self):
-        super(SelectSeats, self).__init__()
-        formLayout = QFormLayout(self)
-        formLayout.addRow("View Seats:", QSpinBox())
-        self.setLayout(formLayout)
-    
-    def setupUI(self):
-        print("TODO")
-
 class Payment(QWidget):
     def __init__(self):
         super(Payment, self).__init__()
         formLayout = QFormLayout(self)
         formLayout.addRow("Payment:", QSpinBox())
+        self.setLayout(formLayout)
+    
+    def setupUI(self):
+        print("TODO")
+
+class ManageSeats(QWidget):
+    def __init__(self):
+        super(ManageSeats, self).__init__()
+        formLayout = QFormLayout(self)
+        formLayout.addRow("View Seats:", QSpinBox())
         self.setLayout(formLayout)
     
     def setupUI(self):
@@ -196,14 +198,14 @@ class MainWindow(QMainWindow):
         # Add widgets
         self.layout = QStackedLayout()
         
-        SelectTicketsUI = SelectTickets(width,height)
-        self.layout.addWidget(SelectTicketsUI)
-
-        SelectSeatsUI = SelectSeats()
-        self.layout.addWidget(SelectSeatsUI)
+        BookTicketsUI = BookTickets(width,height)
+        self.layout.addWidget(BookTicketsUI)
 
         PaymentUI = Payment()
         self.layout.addWidget(PaymentUI)
+
+        ManageSeatsUI = ManageSeats()
+        self.layout.addWidget(ManageSeatsUI)
 
         ViewRevenueUI = ViewRevenue()
         self.layout.addWidget(ViewRevenueUI)
@@ -212,7 +214,7 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(SearchCustomerUI)
 
         # UI list will hold references for windows
-        self.UIs = [SelectTicketsUI, SelectSeatsUI, PaymentUI, ViewRevenueUI, SearchCustomerUI]
+        self.UIs = [BookTicketsUI, ManageSeatsUI, PaymentUI, ViewRevenueUI, SearchCustomerUI]
         widget = QWidget()
         widget.setLayout(self.layout)
         self.setCentralWidget(widget)

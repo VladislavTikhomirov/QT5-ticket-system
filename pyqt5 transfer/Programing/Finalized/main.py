@@ -234,11 +234,11 @@ class SeatMap(QWidget):
         seatsFrame = QFrame(self)
      
         screenFrame = QFrame()
-        screenFrame.setFixedHeight(50)
+        screenFrame.setFixedHeight(40)
         screenFrame.setStyleSheet('background-color: black;')
         screenLayout = QVBoxLayout()
         screenLabel = QLabel("Screen")
-        screenLabel.setStyleSheet('color: white; font-size: 18px;')
+        screenLabel.setStyleSheet('color: white; font-size: 10px;')
         screenLayout.addWidget(screenLabel)
         screenFrame.setLayout(screenLayout)
         
@@ -246,7 +246,7 @@ class SeatMap(QWidget):
         for row in range(0,cinema_rows):
             for seat in range(0,cinema_seats_per_row):
                 button = QPushButton(chr(97+row).upper() + str(seat))
-                button.setFixedSize(60, 60)
+                button.setFixedSize(30, 30)
                 seatsLayout.addWidget(button, row, seat)
 
         seatsFrame.setLayout(seatsLayout)

@@ -127,8 +127,6 @@ class BookTickets(QWidget):
 
         frameRight = QFrame(self)
 
-        SetMapUI = SeatMap()
-
         formRightLayout = QFormLayout(self)
         formRightLayout.setVerticalSpacing(50)
         formRightLayout.setHorizontalSpacing(50)
@@ -136,11 +134,10 @@ class BookTickets(QWidget):
         
         self.my_title = QLabel("Seats map:")
         formRightLayout.addWidget(self.my_title)
-        formRightLayout.addWidget(SetMapUI)
-
-        #TODO add seat map
         
-
+        SetMapUI = SeatMap()
+        formRightLayout.addWidget(SetMapUI)
+        
         frameRight.setLayout(formRightLayout)
         mainLayout.addWidget(frameRight)
        

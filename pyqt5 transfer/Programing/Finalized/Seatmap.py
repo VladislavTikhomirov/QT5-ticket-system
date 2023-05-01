@@ -2,16 +2,22 @@ import sys, pyodbc
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QLineEdit
 from PyQt5.QtGui import QColor, QPalette, QFont
 from PyQt5 import QtCore, QtGui
-class NightSeatmap(QWidget):
-    def __init__(self):
+
+class seatmap(QWidget):
+    def __init__(self,width,height,night):
         super().__init__()
-        self.initUI()
-    def initUI(self):
-        self.setWindowTitle("Seatmap")
-        self.resize(1080, 1000)
+        self.width = width
+        self.height = height
+        self.night = night
+        self.selected_seats = []
+        self.CreateUI()
+    def CreateUI(self):
+        self.setWindowTitle(str(self.night))
         self.seatspicked = QLineEdit()
         self.price_of_seats = QLineEdit()
-        # Set the background color to #dda83e
+        self.price_of_seats.setPlaceholderText("Price: £")
+        
+        
         palette = self.palette()
         palette.setColor(QPalette.Background, QColor('#dda83e'))
         self.setPalette(palette)
@@ -36,7 +42,6 @@ class NightSeatmap(QWidget):
         hbox.addWidget(white_frame)
         # Create a vertical layout for the buttons
         vbox2 = QVBoxLayout()
-        self.selected_seats = [] # Create a list to store selected seats
         for i in range(1,21):
             hbox3 = QHBoxLayout()
             for j in range(1,11):
@@ -138,7 +143,12 @@ class NightSeatmap(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-
-    window = NightSeatmap()
-    window.show()
     sys.exit(app.exec_())
+
+
+
+
+
+        
+
+

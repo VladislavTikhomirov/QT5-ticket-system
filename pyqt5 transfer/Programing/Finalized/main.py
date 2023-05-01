@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QTo
 from PyQt5.QtGui import QPalette, QColor
 from PyQt5 import QtCore
 import sys
+from Seatmap import seatmap
 
 # Constant for ticket prices 
 ticket_price_adult = 10
@@ -135,6 +136,7 @@ class BookTickets(QWidget):
         formLayout2.addWidget(self.my_title)
 
         #TODO add seat map
+        
 
         frame2.setLayout(formLayout2)
         main_layout.addWidget(frame2)
@@ -165,6 +167,9 @@ class BookTickets(QWidget):
                 self.show = 2
             else:
                 self.show = 3
+            self.seatmap = seatmap(main_window_width, main_window_height, self.show)
+            self.seatmap.show()
+            
         print(self.show)   
 
     def setupUI(self):

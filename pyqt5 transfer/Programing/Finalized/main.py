@@ -226,11 +226,11 @@ class SeatMap(QWidget):
         seatsFrame = QFrame(self)
      
         screenFrame = QFrame()
-        screenFrame.setFixedHeight(40)
+        screenFrame.setFixedHeight(50)
         screenFrame.setStyleSheet('background-color: black;')
         screenLayout = QVBoxLayout()
         screenLabel = QLabel("Screen")
-        screenLabel.setStyleSheet('color: white; font-size: 10px;')
+        screenLabel.setStyleSheet('color: white; font-size: 18px;')
         screenLayout.addWidget(screenLabel)
         screenFrame.setLayout(screenLayout)
         

@@ -179,8 +179,19 @@ class Payment(QWidget):
     def __init__(self):
         super(Payment, self).__init__()
         formLayout = QFormLayout(self)
-        formLayout.addRow("Payment:", QSpinBox())
         self.setLayout(formLayout)
+
+        self.lnNameOfCard = QLineEdit()
+        self.lnNameOfCard.setObjectName("lnNameOfCard")
+        self.lnNameOfCard.setFixedWidth(250)
+        self.lnNameOfCard.setFixedHeight(30)
+        formLayout.addRow("Name on Card:", self.lnNameOfCard)
+
+        self.lnCardNumber = QLineEdit()
+        self.lnCardNumber.setObjectName("lnCardNumber")
+        self.lnCardNumber.setFixedWidth(250)
+        self.lnCardNumber.setFixedHeight(30)
+        formLayout.addRow("Card Number:", self.lnCardNumber)
     
     def setupUI(self):
         print("TODO")
@@ -235,7 +246,7 @@ class SeatMap(QWidget):
         for row in range(0,cinema_rows):
             for seat in range(0,cinema_seats_per_row):
                 button = QPushButton(chr(97+row).upper() + str(seat))
-                button.setFixedSize(50, 50)
+                button.setFixedSize(60, 60)
                 seatsLayout.addWidget(button, row, seat)
 
         seatsFrame.setLayout(seatsLayout)

@@ -1,9 +1,9 @@
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout, QSpinBox, QLineEdit, QGroupBox, QFrame, QHBoxLayout, QVBoxLayout, QLabel, QRadioButton, QButtonGroup
-from PyQt5.QtGui import QPalette, QColor
+from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout, QSpinBox, QLineEdit, QGroupBox, QFrame, QHBoxLayout, QVBoxLayout, QLabel, QRadioButton, QButtonGroup, QGridLayout,QPushButton
+from PyQt5.QtGui import QPalette, QColor, QFont
 from PyQt5 import QtCore
 import sys
-from Seatmap import seatmap
+#from Seatmap import seatmap
 
 # Constant for ticket prices 
 ticket_price_adult = 10
@@ -11,8 +11,8 @@ ticket_price_child = 5
 ticket_price_elderly = 5
 ticket_price_special = 0
 # Cimema hall size 
-cinema_rows = 2
-cinema_seats_per_row = 2
+cinema_rows = 10
+cinema_seats_per_row = 20
 # Program window size as % from screen
 main_window_height = 0.8 
 main_window_width = 0.8
@@ -56,17 +56,17 @@ class BookTickets(QWidget):
     def __init__(self, width, height):
         super(BookTickets, self).__init__()
         
-        main_layout = QHBoxLayout()
+        mainLayout = QHBoxLayout()
 
-        frame1 = QFrame(self)
+        frameLeft = QFrame(self)
 
-        formLayout1 = QFormLayout(self)
-        formLayout1.setVerticalSpacing(50)
-        formLayout1.setHorizontalSpacing(50)
-        formLayout1.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        formLeftLayout = QFormLayout(self)
+        formLeftLayout.setVerticalSpacing(50)
+        formLeftLayout.setHorizontalSpacing(50)
+        formLeftLayout.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         
         self.my_title = QLabel("Select Tickets")
-        formLayout1.addWidget(self.my_title)
+        formLeftLayout.addWidget(self.my_title)
 
         # Create and add group of radio buttons
         self.my_show1 = QRadioButton('Show 1')
@@ -83,65 +83,68 @@ class BookTickets(QWidget):
         groupBox.layout().addWidget(self.my_show1)
         groupBox.layout().addWidget(self.my_show2)
         groupBox.layout().addWidget(self.my_show3)
-        formLayout1.addRow("Select a Show", groupBox)
+        formLeftLayout.addRow("Select a Show", groupBox)
         # Radio button press handler
         self.my_show_group.buttonClicked.connect(self.my_show_clicked)
         
         # Create and add spin boxes
         self.my_adult = QSpinBox()
-        formLayout1.addRow(f"Adults (£{ticket_price_adult})", self.my_adult)
+        formLeftLayout.addRow(f"Adults (£{ticket_price_adult})", self.my_adult)
         self.my_adult.valueChanged.connect(self.setTotal)
         self.my_adult.setFixedWidth(100)
         self.my_adult.setFixedHeight(40)
 
         self.my_child = QSpinBox()
-        formLayout1.addRow(f"Children (£{ticket_price_child})", self.my_child)
+        formLeftLayout.addRow(f"Children (£{ticket_price_child})", self.my_child)
         self.my_child.valueChanged.connect(self.setTotal)
         self.my_child.setFixedWidth(100)
         self.my_child.setFixedHeight(40)
 
         self.my_elderly = QSpinBox()
-        formLayout1.addRow(f"Elderly (£{ticket_price_elderly})", self.my_elderly)
+        formLeftLayout.addRow(f"Elderly (£{ticket_price_elderly})", self.my_elderly)
         self.my_elderly.valueChanged.connect(self.setTotal)
         self.my_elderly.setFixedWidth(100)
         self.my_elderly.setFixedHeight(40)
 
         self.my_special = QSpinBox()
-        formLayout1.addRow(f"Special (£{ticket_price_special})", self.my_special)
+        formLeftLayout.addRow(f"Special (£{ticket_price_special})", self.my_special)
         self.my_special.valueChanged.connect(self.setTotal)
         self.my_special.setFixedWidth(100)
         self.my_special.setFixedHeight(40)
 
         # Create and add total
         self.my_total = QLabel()
-        formLayout1.addRow("Total Price:",self.my_total)
+        formLeftLayout.addRow("Total Price:",self.my_total)
         self.my_total.setText("£ 0")
     
         self.my_button = QToolButton()
         self.my_button.setText("Next >>")
-        formLayout1.addWidget(self.my_button)
+        formLeftLayout.addWidget(self.my_button)
 
-        frame1.setLayout(formLayout1)
-        main_layout.addWidget(frame1)
-        frame1.setFixedWidth(int(width/2)) 
+        frameLeft.setLayout(formLeftLayout)
+        mainLayout.addWidget(frameLeft)
+        frameLeft.setFixedWidth(int(width/3)) 
 
-        frame2 = QFrame(self)
+        frameRight = QFrame(self)
 
-        formLayout2 = QFormLayout(self)
-        formLayout2.setVerticalSpacing(50)
-        formLayout2.setHorizontalSpacing(50)
-        formLayout2.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        SetMapUI = SeatMap()
+
+        formRightLayout = QFormLayout(self)
+        formRightLayout.setVerticalSpacing(50)
+        formRightLayout.setHorizontalSpacing(50)
+        formRightLayout.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         
         self.my_title = QLabel("Seats map:")
-        formLayout2.addWidget(self.my_title)
+        formRightLayout.addWidget(self.my_title)
+        formRightLayout.addWidget(SetMapUI)
 
         #TODO add seat map
         
 
-        frame2.setLayout(formLayout2)
-        main_layout.addWidget(frame2)
+        frameRight.setLayout(formRightLayout)
+        mainLayout.addWidget(frameRight)
        
-        self.setLayout(main_layout)
+        self.setLayout(mainLayout)
 
     def setTotal(self):
         total_places = self.my_adult.value() + self.my_child.value() + self.my_elderly.value() + self.my_special.value()
@@ -167,8 +170,8 @@ class BookTickets(QWidget):
                 self.show = 2
             else:
                 self.show = 3
-            self.seatmap = seatmap(main_window_width, main_window_height, self.show)
-            self.seatmap.show()
+            #self.seatmap = seatmap(main_window_width, main_window_height, self.show)
+            #self.seatmap.show()
             
         print(self.show)   
 
@@ -211,6 +214,38 @@ class SearchCustomer(QWidget):
         formLayout = QFormLayout(self)
         formLayout.addRow("Search Customer:", QSpinBox())
         self.setLayout(formLayout)
+    
+    def setupUI(self):
+        print("TODO")
+
+class SeatMap(QWidget):
+    def __init__(self):
+        super(SeatMap, self).__init__()
+        mainLayout = QVBoxLayout()
+
+        seatsFrame = QFrame(self)
+     
+        screenFrame = QFrame()
+        screenFrame.setFixedHeight(40)
+        screenFrame.setStyleSheet('background-color: black;')
+        screenLayout = QVBoxLayout()
+        screenLabel = QLabel("Screen")
+        screenLabel.setStyleSheet('color: white; font-size: 10px;')
+        screenLayout.addWidget(screenLabel)
+        screenFrame.setLayout(screenLayout)
+        
+        seatsLayout = QGridLayout()
+        for row in range(0,cinema_rows):
+            for seat in range(0,cinema_seats_per_row):
+                button = QPushButton(chr(97+row).upper() + str(seat))
+                button.setFixedSize(50, 50)
+                seatsLayout.addWidget(button, row, seat)
+
+        seatsFrame.setLayout(seatsLayout)
+
+        mainLayout.addWidget(screenFrame)
+        mainLayout.addWidget(seatsFrame)
+        self.setLayout(mainLayout)
     
     def setupUI(self):
         print("TODO")

@@ -71,14 +71,14 @@ QLineEdit {
 QFrame {
     background-color: #DDA82A;
     border: 2px solid white;
-    text-align: center;
+    text-align: left;
 }
 
 QLabel{
     border: 0px solid white;
     font-family: Arial;
     font-size: 24px;
-    text-align: center;
+    text-align: left;
     font-weight: bold;
 }
 
@@ -88,4 +88,15 @@ QRadioButton{
     font-size: 24px;
     text-align: center;
     font-weight: bold;
+}
+
+QPushButton {
+    background-color: black; 
+    color: white; 
+    font-size: 10px;
+}
+
+QPushButton:hover, QToolButton:focus, QToolButton:pressed {
+    background-color: darkgreen; /* Set the background color when hovered, focused or pressed */
+    color: #DDA82A;
 }

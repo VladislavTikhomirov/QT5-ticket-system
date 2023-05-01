@@ -1,4 +1,4 @@
-import sys, pyodbc
+import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QLineEdit
 from PyQt5.QtGui import QColor, QPalette, QFont
 from PyQt5 import QtCore, QtGui

@@ -396,28 +396,68 @@ class ManageSeats(QWidget):
 class ViewRevenue(QWidget):
     def __init__(self,main_window):
         super(ViewRevenue, self).__init__(main_window)
+        layout = QFormLayout(self)
+
+        my_graph1 = QRadioButton('Show 1 Revenue')
+        my_graph2 = QRadioButton('Show 2 Revenue')
+        my_graph3 = QRadioButton('Show 3 Revenue')
+
+        my_graph1.setChecked(True)
+        
+        self.my_show_group = QButtonGroup()
+        self.my_show_group.addButton(my_graph1)
+        self.my_show_group.addButton(my_graph2)
+        self.my_show_group.addButton(my_graph3)
+        self.my_show_group.buttonClicked.connect(self.handle_graph_show_clicked)
+
+        my_group_box = QGroupBox()
+        my_group_box.setLayout(QVBoxLayout())
+        my_group_box.layout().addWidget(my_graph1)
+        my_group_box.layout().addWidget(my_graph2)
+        my_group_box.layout().addWidget(my_graph3)
+
+        my_graph_title = QLabel("Pick a night to display a graph for:")
+        layout.addRow(my_graph_title)
+        layout.addRow(my_group_box)
 
         # create a figure and axis object
-        fig, ax = plt.subplots()
+        self.fig, self.ax = plt.subplots(figsize=(8, 10), dpi=100)
 
-        # plot the data as a line graph
-        x = [1, 2, 3, 4, 5]
-        y = [2, 4, 6, 8, 10]
-        ax.plot(x, y)
+        # plot the initial data as a line graph
+        self.my_x = [1,2,3,4,5]
+        self.my_y = [1,2,3,5,0]
+        self.ax.plot(self.my_x, self.my_y)
 
         # add labels and title
-        ax.set_xlabel("Seats Booked")
-        ax.set_ylabel("Total money")
-        ax.set_title("Revenue")
+        self.ax.set_xlabel("Seats Booked")
+        self.ax.set_ylabel("Total Money")
+        self.ax.set_title("Revenue:")
 
         # create a canvas to display the graph
-        canvas = FigureCanvas(fig)
-
-        # add the canvas to the widget
-        layout = QFormLayout(self)
-        layout.addRow("View Revenue:", canvas)
+        canvas = FigureCanvas(self.fig)
+        layout.addRow("", canvas)
         self.setLayout(layout)
 
+    def handle_graph_show_clicked(self, button):
+        if button.text() == 'Show 1':
+            self.my_x = [1,2,3,4,5]
+            self.my_y = [1,2,3,5,0]
+        elif button.text() == 'Show 2':
+            self.my_x = [1,2,3,4,5]
+            self.my_y = [10,9,8,7,4]                
+        else:
+            self.my_x = [3,4,5,6,7]
+            self.my_y = [7,10,11,16,32]
+
+        # update the graph with the new data
+        self.ax.clear()
+        self.ax.plot(self.my_x, self.my_y)
+        self.ax.set_xlabel("Seats Booked")
+        self.ax.set_ylabel("Total Money")
+        self.ax.set_title("Revenue:")
+        self.fig.canvas.draw_idle()   
+
+            
 class SearchCustomer(QWidget):
     def __init__(self,main_window):
         super(SearchCustomer, self).__init__(main_window)

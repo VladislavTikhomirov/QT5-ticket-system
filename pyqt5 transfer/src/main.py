@@ -1,7 +1,6 @@
-from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtCore import QSize, Qt, QRegExp
 from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout, QSpinBox, QLineEdit, QGroupBox, QFrame, QHBoxLayout, QVBoxLayout, QLabel, QRadioButton, QButtonGroup, QGridLayout,QPushButton
-from PyQt5.QtGui import QPalette, QColor, QFont
-from PyQt5 import QtCore
+from PyQt5.QtGui import QKeyEvent, QRegExpValidator
 import sys, pyodbc
 import resources as res
 
@@ -238,38 +237,144 @@ class BookTickets(QWidget):
 class Payment(QWidget):
     def __init__(self,main_window):
         super(Payment, self).__init__(main_window)
+        self.my_main_window = main_window
+        # Create a widget to hold the form
+        form_widget = QWidget(self)
 
-        self.my_main_window = main_window 
-        formLayout = QFormLayout(self)
-        self.setLayout(formLayout)
+        # Set the layout of the widget to a QVBoxLayout
+        vbox_layout = QVBoxLayout(form_widget)
+        vbox_layout.setAlignment(Qt.AlignCenter)
+        form_widget.setLayout(vbox_layout)
 
+
+        # Add the elements to the QGridLayout
         self.my_card_name = QLineEdit()
-        self.my_card_name.setObjectName("my_card_name")
-        self.my_card_name.setFixedWidth(250)
-        self.my_card_name.setFixedHeight(30)
-        formLayout.addRow("Name on Card:", self.my_card_name)
-
         self.my_card_number = QLineEdit()
-        self.my_card_number.setObjectName("lnCardNumber")
-        self.my_card_number.setFixedWidth(250)
+        self.my_card_expiry = QLineEdit()
+        self.my_card_cvv = QLineEdit()
+        self.my_confirm_payment = QPushButton("Confirm")
+        
+
+        vbox_layout.addWidget(QLabel("Name on Card:"))
+        vbox_layout.addWidget(self.my_card_name)
+        self.my_card_name.setFixedWidth(500)
+        self.my_card_name.setFixedHeight(30)
+        # Only accepts letters and 1 space
+        validator = QRegExpValidator(self)
+        validator.setRegExp(QRegExp(r'^[a-zA-Z]+(\s[a-zA-Z]+)?$'))
+        self.my_card_name.setValidator(validator)
+
+        self.my_card_name.textChanged.connect(self.validate_card_name)
+        self.my_card_name.setObjectName("my_card_name")
+
+        vbox_layout.addWidget(QLabel("Card Number:"))
+        vbox_layout.addWidget(self.my_card_number)
+        self.my_card_number.setFixedWidth(500)
         self.my_card_number.setFixedHeight(30)
         self.my_card_number.setMaxLength(16)
-        formLayout.addRow("Card Number:", self.my_card_number)
+        self.my_card_number.textChanged.connect(self.validate_card_number)
+        self.my_card_number.setObjectName("my_card_number")
 
-        self.my_card_expiry = QLineEdit()
-        self.my_card_expiry.setObjectName("lnCardNumber")
-        self.my_card_expiry.setFixedWidth(250)
+        vbox_layout.addWidget(QLabel("Card Expiry:"))
+        vbox_layout.addWidget(self.my_card_expiry)
+        self.my_card_expiry.setFixedWidth(70)
         self.my_card_expiry.setFixedHeight(30)
         self.my_card_expiry.setMaxLength(5)
-        formLayout.addRow("Card Expiry:", self.my_card_expiry)
+        self.my_card_expiry.setPlaceholderText("MM/YY")
+        self.my_card_expiry.textChanged.connect(self.validate_expiry)
+        self.my_card_expiry.installEventFilter(self)
+        self.my_card_expiry.setObjectName("my_card_expiry")
+        
 
-        self.my_card_cvv = QLineEdit()
-        self.my_card_cvv.setObjectName("lnCardNumber")
-        self.my_card_cvv.setFixedWidth(250)
+        vbox_layout.addWidget(QLabel("CVV:"))
+        vbox_layout.addWidget(self.my_card_cvv)
+        self.my_card_cvv.setFixedWidth(50)
         self.my_card_cvv.setFixedHeight(30)
         self.my_card_cvv.setMaxLength(3)
-        formLayout.addRow("CVV:", self.my_card_cvv)
+        self.my_card_cvv.textChanged.connect(self.validate_cvv)
+        self.my_card_cvv.setObjectName("my_card_cvv")
 
+        self.setStyleSheet("QLineEdit{background-color: rgba(255, 0, 0, 0.2);}")
+
+        vbox_layout.addWidget(self.my_confirm_payment)
+        self.my_confirm_payment.setFixedHeight(50)
+        self.my_confirm_payment.setFixedWidth(70)
+        self.my_confirm_payment.clicked.connect(self.handle_payment_sql)
+        self.setLayout(vbox_layout)
+
+    # All validation
+    def validate_card_name(self, text):
+        self.my_card_name.setText(text.upper())
+        if len(text) > 0:
+            self.my_card_name.setStyleSheet("QLineEdit#my_card_name{background-color: rgba(0, 255, 0, 0.2);}")
+        else:
+            self.my_card_name.setStyleSheet("QLineEdit#my_card_name{background-color: rgba(255, 0, 0, 0.2);}")
+    def validate_card_number(self, text):
+        self.my_card_number.setText("".join(filter(str.isdigit, text)))
+        if len(text) == 16:
+            self.my_card_number.setStyleSheet("QLineEdit#my_card_number{background-color: rgba(0, 255, 0, 0.2);}")
+        else:
+            self.my_card_number.setStyleSheet("QLineEdit#my_card_number{background-color: rgba(255, 0, 0, 0.2);}")
+    def validate_expiry(self, text):
+        if len(text) == 2 and text[2:3] != '/':
+            text += '/'
+            self.my_card_expiry.setText(text)
+        # Check if text matches the desired format "MM/YY"
+        if len(text) != 5 or text[2] != "/":
+            self.my_card_expiry.setStyleSheet("QLineEdit#my_card_expiry{background-color: rgba(255, 0, 0, 0.2);}")
+        else:
+            month_str, year_str = text[:2], text[3:]
+            try:
+                month, year = int(month_str), int(year_str)
+            except ValueError:
+                self.my_card_expiry.setStyleSheet("QLineEdit#my_card_expiry{background-color: rgba(255, 0, 0, 0.2);}")
+                return
+            # Check if month is between 1 and 12, and year is at least 24
+            if month < 1 or month > 12 or year < 23:
+                self.my_card_expiry.setStyleSheet("QLineEdit#my_card_expiry{background-color: rgba(255, 0, 0, 0.2);}")
+            else:
+                self.my_card_expiry.setStyleSheet("QLineEdit#my_card_expiry{background-color: rgba(0, 255, 0, 0.2);}")
+    def eventFilter(self, source, event):
+        if (event.type() == QKeyEvent.KeyPress and event.key() == Qt.Key_Backspace):
+            source.clear()
+            return True
+        return super().eventFilter(source, event)
+    def validate_cvv(self, text):
+        if len(text) == 3:
+            self.my_card_cvv.setStyleSheet("QLineEdit#my_card_cvv{background-color: rgba(0, 255, 0, 0.2);}")
+        else:
+            self.my_card_cvv.setStyleSheet("QLineEdit#my_card_cvv{background-color: rgba(255, 0, 0, 0.2);}")
+    
+    def handle_payment_sql(self):
+        print("I work just not for this pc")
+        '''
+        try:
+            cs = pyodbc.connect(
+                "Driver={SQL Server};"
+                "Server=svr-cmp-01;"
+                "Database=22TikhomirV699;"
+                "Trusted_Connection=yes;"
+            )
+
+            print("Connection Yes")
+
+            cursor = cs.cursor()
+
+            name = self.my_card_name.text()
+            card = self.my_card_number.text()
+            if name == "" or card == "":
+                cursor.close()
+                cs.close()
+            query = "INSERT INTO Payment (name, card) VALUES (?,?)"
+
+            my_values = (name,card)
+            cursor.execute(query,my_values)
+            cs.commit()
+            cursor.close()
+            cs.close()
+        except pyodbc.Error as e:
+            print(e)
+        '''
 
 class ManageSeats(QWidget):
     def __init__(self,main_window):
@@ -318,7 +423,7 @@ class SeatMap(QWidget):
         
         self.seatsLayout = QGridLayout()
         for row in range(0,res.cinema_rows):
-            for seat in range(0,res.cinema_seats_per_row):
+            for seat in range(1,res.cinema_seats_per_row+1):
                 button = QPushButton(chr(97+row).upper() + str(seat))
                 button.setFixedSize(30, 30)
                 self.seatsLayout.addWidget(button, row, seat)

@@ -91,9 +91,9 @@ QRadioButton{
 }
 
 QPushButton {
-    background-color: black; 
+    background-color: #131f44; 
     color: white; 
-    font-size: 10px;
+    font-size: 12px;
 }
 
 QPushButton:hover {

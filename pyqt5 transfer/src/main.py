@@ -265,7 +265,7 @@ class Payment(QWidget):
         validator = QRegExpValidator(self)
         validator.setRegExp(QRegExp(r'^[a-zA-Z]+(\s[a-zA-Z]+)?$'))
         self.my_card_name.setValidator(validator)
-
+        self.my_card_name.setPlaceholderText("A Birling")
         self.my_card_name.textChanged.connect(self.validate_card_name)
         self.my_card_name.setObjectName("my_card_name")
 
@@ -274,6 +274,7 @@ class Payment(QWidget):
         self.my_card_number.setFixedWidth(500)
         self.my_card_number.setFixedHeight(30)
         self.my_card_number.setMaxLength(16)
+        self.my_card_number.setPlaceholderText("XXXXXXXXXXXXXXXX")
         self.my_card_number.textChanged.connect(self.validate_card_number)
         self.my_card_number.setObjectName("my_card_number")
 
@@ -293,6 +294,7 @@ class Payment(QWidget):
         self.my_card_cvv.setFixedWidth(50)
         self.my_card_cvv.setFixedHeight(30)
         self.my_card_cvv.setMaxLength(3)
+        self.my_card_cvv.setPlaceholderText("123")
         self.my_card_cvv.textChanged.connect(self.validate_cvv)
         self.my_card_cvv.setObjectName("my_card_cvv")
 
@@ -456,8 +458,7 @@ class ViewRevenue(QWidget):
         self.ax.set_ylabel("Total Money")
         self.ax.set_title("Revenue:")
         self.fig.canvas.draw_idle()   
-
-            
+           
 class SearchCustomer(QWidget):
     def __init__(self,main_window):
         super(SearchCustomer, self).__init__(main_window)

@@ -2,7 +2,7 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout, QSpinBox, QLineEdit, QGroupBox, QFrame, QHBoxLayout, QVBoxLayout, QLabel, QRadioButton, QButtonGroup, QGridLayout,QPushButton
 from PyQt5.QtGui import QPalette, QColor, QFont
 from PyQt5 import QtCore
-import sys
+import sys, pyodbc
 import resources as res
 
 class ToolBar(QToolBar):
@@ -65,7 +65,7 @@ class BookTickets(QWidget):
         my_group_box.layout().addWidget(my_show1)
         my_group_box.layout().addWidget(my_show2)
         my_group_box.layout().addWidget(my_show3)
-
+        self.show = 1
         self.my_show_group.buttonClicked.connect(self.handle_radio_button_clicked)
         my_form_left_layout.addWidget(my_group_box,0)
         
@@ -80,7 +80,6 @@ class BookTickets(QWidget):
         self.my_adult.valueChanged.connect(self.handle_spinners_change)
         self.my_adult.setFixedWidth(100)
         self.my_adult.setFixedHeight(40)
-
         self.my_child = QSpinBox()
         my_spinners_layout.addRow(f"Children (£{res.ticket_price_child})", self.my_child)
         self.my_child.valueChanged.connect(self.handle_spinners_change)
@@ -109,7 +108,7 @@ class BookTickets(QWidget):
         my_spinners_layout.setLabelAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         my_spinners_layout.setVerticalSpacing(20)
         my_form_left_layout.addWidget(my_spinners_widget,1)
-
+        
         # Add reset button
         my_button_reset_1 = QPushButton("Reset")
         my_form_left_layout.addWidget(my_button_reset_1)
@@ -129,11 +128,15 @@ class BookTickets(QWidget):
         self.my_seat_map = SeatMap(self.my_main_window)
         my_form_right_layout.addWidget(self.my_seat_map, 1)
 
+        my_button_send_sql_of_right_side = QPushButton("Confirm Seats")
+        my_form_right_layout.addWidget(my_button_send_sql_of_right_side)
+        my_button_send_sql_of_right_side.clicked.connect(self.handle_send_sql)
+
         # Add reset button
         my_button_reset_2 = QPushButton("Reset")
         my_form_right_layout.addWidget(my_button_reset_2)
         my_button_reset_2.clicked.connect(self.handle_reset_button_click_2)
-    
+
         my_frame_right.setLayout(my_form_right_layout)
         my_main_layout.addWidget(my_frame_right,1)
        
@@ -168,6 +171,47 @@ class BookTickets(QWidget):
             #self.seatmap.show()
             
         print(self.show)
+    
+    def handle_send_sql(self):
+        try:
+            cs = pyodbc.connect(
+                "Driver={SQL Server};"
+                "Server=svr-cmp-01;"
+                "Database=22TikhomirV699;"
+                "Trusted_Connection=yes;"
+            )
+
+            print("Connection Yes")
+
+            cursor = cs.cursor()
+            
+            adult = self.my_adult.value()
+            child = self.my_child.value()
+            elderly = self.my_elderly.value()
+            special = self.my_special.value()
+            my_total = adult + child + elderly + special
+            my_seats_left = 200 - my_total
+
+            if my_total == 0:
+                cursor.close()
+                cs.close()
+            if self.show == 1:
+                show = 1
+            elif self.show == 2:
+                show = 2
+            else:
+                show = 3
+
+            query = "INSERT INTO Night (show, adult, child,elderly,special) VALUES (?,?,?,?,?)"
+
+            my_values = (show,adult,child,elderly,special)
+            cursor.execute(query,my_values)
+            cs.commit()
+            cursor.close()
+            cs.close()
+        except pyodbc.Error as e:
+            print(e)
+
 
     def get_total_seats(self):
         my_total = self.my_adult.value() + self.my_child.value() + self.my_elderly.value() + self.my_special.value()
@@ -199,18 +243,34 @@ class Payment(QWidget):
         formLayout = QFormLayout(self)
         self.setLayout(formLayout)
 
-        self.lnNameOfCard = QLineEdit()
-        self.lnNameOfCard.setObjectName("lnNameOfCard")
-        self.lnNameOfCard.setFixedWidth(250)
-        self.lnNameOfCard.setFixedHeight(30)
-        formLayout.addRow("Name on Card:", self.lnNameOfCard)
+        self.my_card_name = QLineEdit()
+        self.my_card_name.setObjectName("my_card_name")
+        self.my_card_name.setFixedWidth(250)
+        self.my_card_name.setFixedHeight(30)
+        formLayout.addRow("Name on Card:", self.my_card_name)
 
-        self.lnCardNumber = QLineEdit()
-        self.lnCardNumber.setObjectName("lnCardNumber")
-        self.lnCardNumber.setFixedWidth(250)
-        self.lnCardNumber.setFixedHeight(30)
-        formLayout.addRow("Card Number:", self.lnCardNumber)
-    
+        self.my_card_number = QLineEdit()
+        self.my_card_number.setObjectName("lnCardNumber")
+        self.my_card_number.setFixedWidth(250)
+        self.my_card_number.setFixedHeight(30)
+        self.my_card_number.setMaxLength(16)
+        formLayout.addRow("Card Number:", self.my_card_number)
+
+        self.my_card_expiry = QLineEdit()
+        self.my_card_expiry.setObjectName("lnCardNumber")
+        self.my_card_expiry.setFixedWidth(250)
+        self.my_card_expiry.setFixedHeight(30)
+        self.my_card_expiry.setMaxLength(5)
+        formLayout.addRow("Card Expiry:", self.my_card_expiry)
+
+        self.my_card_cvv = QLineEdit()
+        self.my_card_cvv.setObjectName("lnCardNumber")
+        self.my_card_cvv.setFixedWidth(250)
+        self.my_card_cvv.setFixedHeight(30)
+        self.my_card_cvv.setMaxLength(3)
+        formLayout.addRow("CVV:", self.my_card_cvv)
+
+
 class ManageSeats(QWidget):
     def __init__(self,main_window):
         super(ManageSeats, self).__init__(main_window)

@@ -15,6 +15,6 @@ toolbar_height = 0.1
 main_window_title = "Collyers Theater Resevartion System"
 toolbar_button_names = ["Book Tickets", "Payment", "Manage Seats",  "Veiw Revenue", "Search Customer"]
 
-tickets_left_header = "Select shows"
-tickets_left_middle = "Select tickets"
-tickets_right_header = "Allocate seats"
+tickets_left_header = "Select shows:"
+tickets_left_middle = "Select tickets:"
+tickets_right_header = "Allocate seats:"

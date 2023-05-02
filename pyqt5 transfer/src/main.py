@@ -441,10 +441,10 @@ class ViewRevenue(QWidget):
         self.setLayout(layout)
 
     def handle_graph_show_clicked(self, button):
-        if button.text() == 'Show 1':
+        if button.text() == 'Show 1 Revenue':
             self.my_x = [1,2,3,4,5]
             self.my_y = [1,2,3,5,0]
-        elif button.text() == 'Show 2':
+        elif button.text() == 'Show 2 Rrevenue':
             self.my_x = [1,2,3,4,5]
             self.my_y = [10,9,8,7,4]                
         else:

@@ -2,6 +2,8 @@ from PyQt5.QtCore import QSize, Qt, QRegExp
 from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout, QSpinBox, QLineEdit, QGroupBox, QFrame, QHBoxLayout, QVBoxLayout, QLabel, QRadioButton, QButtonGroup, QGridLayout,QPushButton
 from PyQt5.QtGui import QKeyEvent, QRegExpValidator
 import sys, pyodbc
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import resources as res
 
 class ToolBar(QToolBar):
@@ -316,11 +318,13 @@ class Payment(QWidget):
         else:
             self.my_card_number.setStyleSheet("QLineEdit#my_card_number{background-color: rgba(255, 0, 0, 0.2);}")
     def validate_expiry(self, text):
+        # This makes a slash appear after 2 numbers are entered
         if len(text) == 2 and text[2:3] != '/':
             text += '/'
             self.my_card_expiry.setText(text)
         # Check if text matches the desired format "MM/YY"
         if len(text) != 5 or text[2] != "/":
+            # Independent Style sheet to change to the color red only aplicable to a certain line edit
             self.my_card_expiry.setStyleSheet("QLineEdit#my_card_expiry{background-color: rgba(255, 0, 0, 0.2);}")
         else:
             month_str, year_str = text[:2], text[3:]
@@ -335,16 +339,20 @@ class Payment(QWidget):
             else:
                 self.my_card_expiry.setStyleSheet("QLineEdit#my_card_expiry{background-color: rgba(0, 255, 0, 0.2);}")
     def eventFilter(self, source, event):
+        # This checks for a backspace key and clears entire field
+        # This is necessary as you cannot get rid of automatic slash
+        # as it is permanent. Only way to do it:
         if (event.type() == QKeyEvent.KeyPress and event.key() == Qt.Key_Backspace):
             source.clear()
             return True
         return super().eventFilter(source, event)
+    
     def validate_cvv(self, text):
         if len(text) == 3:
             self.my_card_cvv.setStyleSheet("QLineEdit#my_card_cvv{background-color: rgba(0, 255, 0, 0.2);}")
         else:
             self.my_card_cvv.setStyleSheet("QLineEdit#my_card_cvv{background-color: rgba(255, 0, 0, 0.2);}")
-    
+    # Button function to connect to sql
     def handle_payment_sql(self):
         print("I work just not for this pc")
         '''
@@ -389,10 +397,26 @@ class ViewRevenue(QWidget):
     def __init__(self,main_window):
         super(ViewRevenue, self).__init__(main_window)
 
-        self.my_main_window = main_window 
-        formLayout = QFormLayout(self)
-        formLayout.addRow("View Revenue:", QSpinBox())
-        self.setLayout(formLayout)
+        # create a figure and axis object
+        fig, ax = plt.subplots()
+
+        # plot the data as a line graph
+        x = [1, 2, 3, 4, 5]
+        y = [2, 4, 6, 8, 10]
+        ax.plot(x, y)
+
+        # add labels and title
+        ax.set_xlabel("Seats Booked")
+        ax.set_ylabel("Total money")
+        ax.set_title("Revenue")
+
+        # create a canvas to display the graph
+        canvas = FigureCanvas(fig)
+
+        # add the canvas to the widget
+        layout = QFormLayout(self)
+        layout.addRow("View Revenue:", canvas)
+        self.setLayout(layout)
 
 class SearchCustomer(QWidget):
     def __init__(self,main_window):

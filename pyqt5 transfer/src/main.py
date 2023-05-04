@@ -581,9 +581,16 @@ def main():
     my_window = MainWindow(my_width,my_height)
     my_window.show()
     # Read the QSS file and apply style sheet globally
-    with open("C:\\Users\\vladt\\Documents\\GitHub\\Transfer\\pyqt5 transfer\\src\\style.qss", "r") as f:
-        _style = f.read()
+    
+    my_qss_file_path = ""
+    if sys.platform.startswith('win'):
+        my_qss_file_path = "C:\\Users\\vladt\\Documents\\GitHub\\Transfer\\pyqt5 transfer\\src\\style.qss"
+    else:
+        my_qss_file_path = "./pyqt5 transfer/src/style.qss"
+    with open(my_qss_file_path, "r") as my_qss_file:
+        _style = my_qss_file.read()
         my_app.setStyleSheet(_style)
+        
     # Start the event loop.
     my_app.exec()
     #Your application won't reach here until you exit

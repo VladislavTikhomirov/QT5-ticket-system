@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QSize, Qt, QRegExp
 from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout, QSpinBox, QLineEdit, QGroupBox, QFrame, QHBoxLayout, QVBoxLayout, QLabel, QRadioButton, QButtonGroup, QGridLayout,QPushButton
 from PyQt5.QtGui import QKeyEvent, QRegExpValidator
-import sys, pyodbc
+import sys, pyodbc, string
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import resources as res
@@ -39,7 +39,6 @@ class ToolBar(QToolBar):
 class BookTickets(QWidget):
     def __init__(self, main_window, width, height):
         super(BookTickets, self).__init__(main_window)
-        
         self.my_main_window = main_window 
         my_main_layout = QHBoxLayout()
         # left Panel of UI
@@ -56,6 +55,7 @@ class BookTickets(QWidget):
 
         my_show1.setChecked(True)
         
+
         self.my_show_group = QButtonGroup()
         self.my_show_group.addButton(my_show1)
         self.my_show_group.addButton(my_show2)
@@ -67,7 +67,6 @@ class BookTickets(QWidget):
         my_group_box.layout().addWidget(my_show2)
         my_group_box.layout().addWidget(my_show3)
         self.show = 1
-        self.my_show_group.buttonClicked.connect(self.handle_radio_button_clicked)
         my_form_left_layout.addWidget(my_group_box,0)
         
         # Add Space & Label
@@ -111,9 +110,9 @@ class BookTickets(QWidget):
         my_form_left_layout.addWidget(my_spinners_widget,1)
         
         # Add reset button
-        my_button_reset_1 = QPushButton("Reset")
-        my_form_left_layout.addWidget(my_button_reset_1)
-        my_button_reset_1.clicked.connect(self.handle_reset_button_click_1)
+        #my_button_reset_1 = QPushButton("Reset")
+        #my_form_left_layout.addWidget(my_button_reset_1)
+        #my_button_reset_1.clicked.connect(self.handle_reset_button_click_1)
 
         my_frame_left.setLayout(my_form_left_layout)
         my_main_layout.addWidget(my_frame_left, 0)
@@ -132,11 +131,13 @@ class BookTickets(QWidget):
         my_button_send_sql_of_right_side = QPushButton("Confirm Seats")
         my_form_right_layout.addWidget(my_button_send_sql_of_right_side)
         my_button_send_sql_of_right_side.clicked.connect(self.handle_send_sql)
-
+        my_button_send_sql_of_right_side.clicked.connect(self.handle_seat_Sql)
+        self.my_seat_map.handle_load_sql(1)
+        self.my_show_group.buttonClicked.connect(self.handle_radio_button_clicked)
         # Add reset button
-        my_button_reset_2 = QPushButton("Reset")
-        my_form_right_layout.addWidget(my_button_reset_2)
-        my_button_reset_2.clicked.connect(self.handle_reset_button_click_2)
+        #my_button_reset_2 = QPushButton("Reset")
+        #my_form_right_layout.addWidget(my_button_reset_2)
+        #my_button_reset_2.clicked.connect(self.handle_reset_button_click_2)
 
         my_frame_right.setLayout(my_form_right_layout)
         my_main_layout.addWidget(my_frame_right,1)
@@ -164,34 +165,40 @@ class BookTickets(QWidget):
         if button.isChecked():
             if button.text() == 'Show 1':
                 self.show = 1
+
             elif button.text() == 'Show 2':
                 self.show = 2
             else:
                 self.show = 3
+        self.my_seat_map.handle_load_sql(self.show)
             #self.seatmap = seatmap(main_window_width, main_window_height, self.show)
             #self.seatmap.show()
             
         print(self.show)
     
     def handle_send_sql(self):
+        
         try:
             cs = pyodbc.connect(
                 "Driver={SQL Server};"
-                "Server=svr-cmp-01;"
-                "Database=22TikhomirV699;"
+                "Server=COMPOOTER;"
+                "Database=Transfer;"
                 "Trusted_Connection=yes;"
             )
 
-            print("Connection Yes")
+            print("Places Connected")
 
             cursor = cs.cursor()
-            
+
+            # Retrieve the current PaymentID value from the PaymentCounter table
+            cursor.execute("SELECT PaymentID FROM PaymentCounter")
+            payment_id = cursor.fetchone()[0]
+
             adult = self.my_adult.value()
             child = self.my_child.value()
             elderly = self.my_elderly.value()
             special = self.my_special.value()
             my_total = adult + child + elderly + special
-            my_seats_left = 200 - my_total
 
             if my_total == 0:
                 cursor.close()
@@ -203,16 +210,17 @@ class BookTickets(QWidget):
             else:
                 show = 3
 
-            query = "INSERT INTO Night (show, adult, child,elderly,special) VALUES (?,?,?,?,?)"
+            query = "INSERT INTO Show (ShowID, PaymentID, Adult, Child, Elderly, Special) VALUES (?, ?, ?, ?, ?, ?)"
 
-            my_values = (show,adult,child,elderly,special)
-            cursor.execute(query,my_values)
+            my_values = (show, payment_id, adult, child, elderly, special)
+            cursor.execute(query, my_values)
+
             cs.commit()
+
             cursor.close()
             cs.close()
         except pyodbc.Error as e:
             print(e)
-
 
     def get_total_seats(self):
         my_total = self.my_adult.value() + self.my_child.value() + self.my_elderly.value() + self.my_special.value()
@@ -225,9 +233,9 @@ class BookTickets(QWidget):
         self.my_child.setValue(0)
         self.my_elderly.setValue(0)
         self.my_special.setValue(0)
-
+ 
     def reset_right_form(self):
-        self.my_seat_map.reset_setas(self.get_total_seats())
+        self.my_seat_map.reset_seats(self.get_total_seats())
         
     def handle_reset_button_click_1(self, button):
         self.reset_left_form()
@@ -236,7 +244,150 @@ class BookTickets(QWidget):
     def handle_reset_button_click_2(self, button):
         self.reset_right_form()
 
-class Payment(QWidget):
+    def handle_seat_Sql(self):
+        self.my_seat_map.handle_confirm_seats_sql(self.show)
+
+class SeatMap(QWidget):
+    def __init__(self,main_window):
+        super(SeatMap, self).__init__(main_window)
+
+        self.my_main_window = main_window 
+        mainLayout = QVBoxLayout()
+
+        seatsFrame = QFrame(self)
+
+        screenFrame = QFrame()
+        screenFrame.setFixedHeight(40)
+        screenFrame.setStyleSheet('background-color: black;')
+        screenLayout = QVBoxLayout()
+        screenLabel = QLabel("Screen")
+        screenLabel.setStyleSheet('color: white; font-size: 10px;')
+        screenLayout.addWidget(screenLabel)
+        screenFrame.setLayout(screenLayout)
+        
+        self.seatsLayout = QGridLayout()
+        for row in range(0,res.cinema_rows):
+            for seat in range(1,res.cinema_seats_per_row+1):
+                button = QPushButton(chr(97+row).upper() + str(seat))
+                button.setFixedSize(30, 30)
+                self.seatsLayout.addWidget(button, row, seat)
+                button.setCheckable(True)
+            
+                button.clicked.connect(self.handle_button_clicked)
+
+        seatsFrame.setLayout(self.seatsLayout)
+        mainLayout.addWidget(screenFrame)
+        mainLayout.addWidget(seatsFrame)
+        self.setLayout(mainLayout)
+
+        self.set_max_selectable_seats(res.cinema_rows * res.cinema_seats_per_row)
+        self.selected_seats = []
+        self.original_selected_seats = self.selected_seats.copy()
+
+    def handle_button_clicked(self):
+        button = self.sender()
+        if button.isChecked():
+            if len(self.selected_seats) < self.get_max_selectable_seats():
+                self.selected_seats.append(button.text())
+            else:
+                button.setChecked(False)
+        else:
+            if button.text() not in self.original_selected_seats:
+                self.selected_seats.remove(button.text())
+            else:
+                button.setChecked(True)
+    def reset_seats(self, max):
+        my_rows = self.seatsLayout.rowCount()
+        my_cols = self.seatsLayout.columnCount()
+        for my_row in range(my_rows):
+            for my_col in range(my_cols):
+                my_button_item  = self.seatsLayout.itemAtPosition(my_row, my_col)
+                if my_button_item  is not None:
+                    my_button_widget = my_button_item.widget()
+                    if isinstance(my_button_widget, QPushButton):
+                        seat_name = my_button_widget.text()
+                        if seat_name in self.selected_seats and seat_name not in self.original_selected_seats:
+                            my_button_widget.setChecked(False)
+        self.selected_seats = [seat for seat in self.selected_seats if seat in self.original_selected_seats]
+        self.set_max_selectable_seats(max)
+
+    def handle_load_sql(self, show):
+        try:
+            cs = pyodbc.connect(
+                "Driver={SQL Server};"
+                "Server=COMPOOTER;"
+                "Database=Transfer;"
+                "Trusted_Connection=yes;"
+            )
+
+            print("Seat Loading")
+            cursor = cs.cursor()
+            cursor.execute("SELECT SeatID FROM Seats WHERE Show = ?", (show,))
+            query_seats = cursor.fetchall()
+
+            # Make a list of seat IDs that are already selected for this show
+            selected_seats_for_show = []
+            for seat in query_seats:
+                selected_seats_for_show.append(seat[0])
+
+            # Update the seatmap to reflect the selected seats for this show
+            my_rows = self.seatsLayout.rowCount()
+            my_cols = self.seatsLayout.columnCount()
+            for my_row in range(my_rows):
+                for my_col in range(my_cols):
+                    my_button_item = self.seatsLayout.itemAtPosition(my_row, my_col)
+                    if my_button_item is not None:
+                        my_button_widget = my_button_item.widget()
+                        if isinstance(my_button_widget, QPushButton):
+                            button_text = my_button_widget.text()
+                            if button_text in selected_seats_for_show:
+                                my_button_widget.setChecked(True)
+                                my_button_widget.setEnabled(False)
+                            else:
+                                my_button_widget.setChecked(False)
+                                my_button_widget.setEnabled(True)
+
+
+
+            cs.commit()
+            cursor.close()
+            cs.close()
+        except pyodbc.Error as e:
+            print(e)
+
+
+    def set_max_selectable_seats(self, max):
+        self.max_selectable_seats = max
+
+    def get_max_selectable_seats(self):
+        return self.max_selectable_seats
+
+    def handle_confirm_seats_sql(self, showID):
+        try:
+            cs = pyodbc.connect(
+                "Driver={SQL Server};"
+                "Server=COMPOOTER;"
+                "Database=Transfer;"
+                "Trusted_Connection=yes;"
+            )
+
+            print("Seat Appended")
+
+            cursor = cs.cursor()
+            cursor.execute("SELECT PaymentID FROM PaymentCounter")
+            payment_id = cursor.fetchone()[0]
+            for seat in self.selected_seats:
+                query = "INSERT INTO Seats (PaymentID, SeatID, Show) VALUES (?,?,?)"
+                my_values = (payment_id, seat, showID)
+                cursor.execute(query, my_values)
+
+            cs.commit()
+            cursor.close()
+            cs.close()
+        except pyodbc.Error as e:
+            print(e)
+
+class Payment(QWidget): 
     def __init__(self,main_window):
         super(Payment, self).__init__(main_window)
         self.my_main_window = main_window
@@ -356,36 +507,40 @@ class Payment(QWidget):
             self.my_card_cvv.setStyleSheet("QLineEdit#my_card_cvv{background-color: rgba(255, 0, 0, 0.2);}")
     # Button function to connect to sql
     def handle_payment_sql(self):
-        print("I work just not for this pc")
-        '''
         try:
             cs = pyodbc.connect(
                 "Driver={SQL Server};"
-                "Server=svr-cmp-01;"
-                "Database=22TikhomirV699;"
+                "Server=COMPOOTER;"
+                "Database=Transfer;"
                 "Trusted_Connection=yes;"
             )
 
-            print("Connection Yes")
+            print("Payment Connected")
 
             cursor = cs.cursor()
 
+            cursor.execute("SELECT PaymentID FROM PaymentCounter")
+            payment_id = cursor.fetchone()[0]
+
+        
             name = self.my_card_name.text()
             card = self.my_card_number.text()
-            if name == "" or card == "":
+            expiry = self.my_card_expiry.text()
+            cvv = self.my_card_cvv.text()
+            if name == "" or card == "" or expiry == "" or cvv == "":
                 cursor.close()
                 cs.close()
-            query = "INSERT INTO Payment (name, card) VALUES (?,?)"
-
-            my_values = (name,card)
+            query = "INSERT INTO Payment (PaymentID, Name, Card, Expiry, CVV) VALUES (?,?,?,?,?)"
+            my_values = (payment_id,name,card,expiry,cvv)
             cursor.execute(query,my_values)
+            cursor.execute("UPDATE PaymentCounter SET PaymentID = PaymentID + 1")
             cs.commit()
             cursor.close()
             cs.close()
+            
         except pyodbc.Error as e:
             print(e)
-        '''
-
+        
 class ManageSeats(QWidget):
     def __init__(self,main_window):
         super(ManageSeats, self).__init__(main_window)
@@ -468,71 +623,6 @@ class SearchCustomer(QWidget):
         formLayout.addRow("Search Customer:", QSpinBox())
         self.setLayout(formLayout)
 
-class SeatMap(QWidget):
-    def __init__(self,main_window):
-        super(SeatMap, self).__init__(main_window)
-
-        self.my_main_window = main_window 
-        mainLayout = QVBoxLayout()
-
-        seatsFrame = QFrame(self)
-
-        screenFrame = QFrame()
-        screenFrame.setFixedHeight(40)
-        screenFrame.setStyleSheet('background-color: black;')
-        screenLayout = QVBoxLayout()
-        screenLabel = QLabel("Screen")
-        screenLabel.setStyleSheet('color: white; font-size: 10px;')
-        screenLayout.addWidget(screenLabel)
-        screenFrame.setLayout(screenLayout)
-        
-        self.seatsLayout = QGridLayout()
-        for row in range(0,res.cinema_rows):
-            for seat in range(1,res.cinema_seats_per_row+1):
-                button = QPushButton(chr(97+row).upper() + str(seat))
-                button.setFixedSize(30, 30)
-                self.seatsLayout.addWidget(button, row, seat)
-                button.setCheckable(True)
-                button.clicked.connect(self.handle_button_clicked)
-
-        seatsFrame.setLayout(self.seatsLayout)
-        mainLayout.addWidget(screenFrame)
-        mainLayout.addWidget(seatsFrame)
-        self.setLayout(mainLayout)
-
-        self.set_max_selectable_seats(res.cinema_rows * res.cinema_seats_per_row)
-        self.selected_seats = []
-
-    def handle_button_clicked(self):
-        button = self.sender()
-        if button.isChecked():
-            if len(self.selected_seats) <= self.get_max_selectable_seats()-1:
-                self.selected_seats.append(button.text())
-            else:
-                button.setChecked(False)
-        else:
-            self.selected_seats.remove(button.text())
-
-    def reset_setas(self, max):
-        my_rows = self.seatsLayout.rowCount()
-        my_cols = self.seatsLayout.columnCount()
-        for my_row in range(my_rows):
-            for my_col in range(my_cols):
-                my_button_item  = self.seatsLayout.itemAtPosition(my_row, my_col)
-                if my_button_item  is not None:
-                    my_button_widget = my_button_item.widget()
-                    if isinstance(my_button_widget, QPushButton):
-                        my_button_widget.setChecked(False)
-        
-        self.selected_seats = []
-        self.set_max_selectable_seats(max)
-
-    def set_max_selectable_seats(self, max):
-        self.max_selectable_seats = max
-
-    def get_max_selectable_seats(self):
-        return self.max_selectable_seats
-
 class MainWindow(QMainWindow):
     def __init__(self, width, height):
         super(MainWindow, self).__init__()
@@ -584,14 +674,18 @@ def main():
     
     my_qss_file_path = ""
     if sys.platform.startswith('win'):
-        my_qss_file_path = "C:\\Users\\vladt\\Documents\\GitHub\\Transfer\\pyqt5 transfer\\src\\style.qss"
+        my_qss_file_path = "C:\\Users\\Vlad\\Desktop\\Transfer\\pyqt5 transfer\\src\\style.qss"
     else:
-        my_qss_file_path = "./pyqt5 transfer/src/style.qss"
+        my_qss_file_path = "./Transfer/pyqt5 transfer/src/style.qss"
     with open(my_qss_file_path, "r") as my_qss_file:
         _style = my_qss_file.read()
         my_app.setStyleSheet(_style)
-        
+    '''
+    with open("C:\\Users\\Vlad\\Desktop\\Transfer\\pyqt5 transfer\\src\\style.qss", "r") as f:
+        _style = f.read()
+        my_app.setStyleSheet(_style)
     # Start the event loop.
+    '''
     my_app.exec()
     #Your application won't reach here until you exit
 

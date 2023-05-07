@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QSize, Qt, QRegExp
-from PyQt5.QtWidgets import QApplication, QMainWindow, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout, QSpinBox, QLineEdit, QGroupBox, QFrame, QHBoxLayout, QVBoxLayout, QLabel, QRadioButton, QButtonGroup, QGridLayout,QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow,QTableWidget,QComboBox,QTableWidgetItem, QToolBar, QStatusBar, QToolButton, QStackedLayout, QWidget, QFormLayout, QSpinBox, QLineEdit, QGroupBox, QFrame, QHBoxLayout, QVBoxLayout, QLabel, QRadioButton, QButtonGroup, QGridLayout,QPushButton
 from PyQt5.QtGui import QKeyEvent, QRegExpValidator
 import sys, pyodbc, string
 import matplotlib.pyplot as plt
@@ -551,16 +551,15 @@ class ManageSeats(QWidget):
         self.setLayout(formLayout)
 
 class ViewRevenue(QWidget):
-    def __init__(self,main_window):
+    def __init__(self, main_window):
         super(ViewRevenue, self).__init__(main_window)
         layout = QFormLayout(self)
 
         my_graph1 = QRadioButton('Show 1 Revenue')
         my_graph2 = QRadioButton('Show 2 Revenue')
         my_graph3 = QRadioButton('Show 3 Revenue')
+ 
 
-        my_graph1.setChecked(True)
-        
         self.my_show_group = QButtonGroup()
         self.my_show_group.addButton(my_graph1)
         self.my_show_group.addButton(my_graph2)
@@ -580,11 +579,6 @@ class ViewRevenue(QWidget):
         # create a figure and axis object
         self.fig, self.ax = plt.subplots(figsize=(8, 10), dpi=100)
 
-        # plot the initial data as a line graph
-        self.my_x = [1,2,3,4,5]
-        self.my_y = [1,2,3,5,0]
-        self.ax.plot(self.my_x, self.my_y)
-
         # add labels and title
         self.ax.set_xlabel("Seats Booked")
         self.ax.set_ylabel("Total Money")
@@ -597,31 +591,132 @@ class ViewRevenue(QWidget):
 
     def handle_graph_show_clicked(self, button):
         if button.text() == 'Show 1 Revenue':
-            self.my_x = [1,2,3,4,5]
-            self.my_y = [1,2,3,5,0]
+            show = 1
         elif button.text() == 'Show 2 Revenue':
-            self.my_x = [1,2,3,4,5]
-            self.my_y = [10,9,8,7,4]                
+            show = 2
         else:
-            self.my_x = [3,4,5,6,7]
-            self.my_y = [7,10,11,16,32]
+            show = 3
 
-        # update the graph with the new data
-        self.ax.clear()
-        self.ax.plot(self.my_x, self.my_y)
-        self.ax.set_xlabel("Seats Booked")
-        self.ax.set_ylabel("Total Money")
-        self.ax.set_title("Revenue:")
-        self.fig.canvas.draw_idle()   
-           
+        try:
+            cs = pyodbc.connect(
+                "Driver={SQL Server};"
+                "Server=COMPOOTER;"
+                "Database=Transfer;"
+                "Trusted_Connection=yes;"
+            )
+
+            print("Graph Connected")
+
+            cursor = cs.cursor()
+
+            # select the total number of seats for the specified show
+            cursor.execute("SELECT SUM(Adult + Child + Elderly + Special) FROM Show WHERE ShowID = ?", (show,))
+            total_seats = cursor.fetchone()[0]
+
+            # select the number of seats sold for each ticket type for the specified show
+            cursor.execute("SELECT SUM(Adult), SUM(Child), SUM(Elderly), SUM(Special) FROM Show WHERE ShowID = ?", (show,))
+            adult_sold, child_sold, elderly_sold, special_sold = cursor.fetchone()
+
+            # calculate the revenue for each ticket type
+            adult_revenue = adult_sold * res.ticket_price_adult
+            child_revenue = child_sold * res.ticket_price_child
+            elderly_revenue = elderly_sold * res.ticket_price_elderly
+            special_revenue = special_sold * res.ticket_price_special
+
+            # calculate the total revenue
+            total_revenue = adult_revenue + child_revenue + elderly_revenue + special_revenue
+
+                # update the y-axis data to include the calculated revenue
+            self.my_y = [adult_revenue, child_revenue, elderly_revenue, special_revenue, total_revenue]
+
+                # update the x-axis data to include the total number of seats
+            self.my_x = list(range(1, 6))
+
+                # plot the data with the updated x- and y-axes
+            self.ax.clear()
+            self.ax.bar(self.my_x, self.my_y)
+            self.ax.set_xlabel("Ticket Type")
+            self.ax.set_ylabel("Revenue")
+            self.ax.set_title("Revenue for Show {}".format(show))
+            self.fig.canvas.draw_idle()
+
+            cs.commit()
+            cursor.close()
+            cs.close()
+
+        except pyodbc.Error as e:
+            print(e)
 class SearchCustomer(QWidget):
     def __init__(self,main_window):
         super(SearchCustomer, self).__init__(main_window)
 
         self.my_main_window = main_window 
-        formLayout = QFormLayout(self)
-        formLayout.addRow("Search Customer:", QSpinBox())
-        self.setLayout(formLayout)
+        layout = QVBoxLayout(self)
+
+        # create the search criteria combo box
+        self.search_criteria_combo = QComboBox()
+        self.search_criteria_combo.addItem("Filter by PaymentID (0 upwards)")
+        self.search_criteria_combo.addItem("Filter by Show (1,2,3)")
+        layout.addWidget(self.search_criteria_combo)
+
+        # create the search term line edit
+        self.search_term_edit = QLineEdit()
+        layout.addWidget(self.search_term_edit)
+
+        # create the search button
+        self.search_button = QPushButton("Search")
+        layout.addWidget(self.search_button)
+
+        # create the results table
+        self.results_table = QTableWidget()
+        self.results_table.setColumnCount(4)
+        self.results_table.setHorizontalHeaderLabels(["Unique ID", "Name", "Card", "Seat"])
+        layout.addWidget(self.results_table)
+
+        self.setLayout(layout)
+
+        # connect the search button clicked signal to the search function
+        self.search_button.clicked.connect(self.search)
+
+    def search(self):
+        # get the selected search criteria and search term
+        search_criteria = self.search_criteria_combo.currentText()
+        search_term = self.search_term_edit.text()
+
+        try:
+            cs = pyodbc.connect(
+                "Driver={SQL Server};"
+                "Server=COMPOOTER;"
+                "Database=Transfer;"
+                "Trusted_Connection=yes;"
+            )
+
+            cursor = cs.cursor()
+
+            if search_criteria == "Filter by PaymentID (0 upwards)":
+                cursor.execute("SELECT Payment.PaymentID, Payment.Name, Payment.Card, Seats.SeatID "
+                   "FROM Payment INNER JOIN Seats ON Payment.PaymentID = Seats.PaymentID "
+                   "WHERE Payment.PaymentID = ?", (search_term,))
+            elif search_criteria == "Filter by Show (1,2,3)":
+                cursor.execute("SELECT Payment.PaymentID, Payment.Name, Payment.Card, Seats.SeatID "
+                            "FROM Payment "
+                            "INNER JOIN Seats ON Payment.PaymentID = Seats.PaymentID "
+                            "WHERE Payment.PaymentID IN "
+                            "(SELECT PaymentID FROM Show WHERE ShowID = ?)", (search_term,))
+
+            # populate the results table with the query results
+            results = cursor.fetchall()
+            self.results_table.setRowCount(len(results))
+            for i, row in enumerate(results):
+                for j, col in enumerate(row):
+                    item = QTableWidgetItem(str(col))
+                    self.results_table.setItem(i, j, item)
+
+            cursor.close()
+            cs.close()
+
+        except pyodbc.Error as e:
+            print(e)
 
 class MainWindow(QMainWindow):
     def __init__(self, width, height):

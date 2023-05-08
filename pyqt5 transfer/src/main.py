@@ -376,9 +376,10 @@ class SeatMap(QWidget):
             cursor = cs.cursor()
             cursor.execute("SELECT PaymentID FROM PaymentCounter")
             payment_id = cursor.fetchone()[0]
+            seat_status = "Booked"
             for seat in self.selected_seats:
-                query = "INSERT INTO Seats (PaymentID, SeatID, Show) VALUES (?,?,?)"
-                my_values = (payment_id, seat, showID)
+                query = "INSERT INTO Seats (PaymentID, SeatStatus, SeatID, Show) VALUES (?,?,?,?)"
+                my_values = (payment_id, seat_status, seat, showID)
                 cursor.execute(query, my_values)
 
             cs.commit()
